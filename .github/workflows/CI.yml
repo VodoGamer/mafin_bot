@@ -1,0 +1,32 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry==1.2.0
+
+      - uses: actions/setup-python@v4.1.0
+        id: python-setup
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      - name: Set python version for poetry
+        run: poetry env use 3.10
+
+      - name: Install dependencies
+        if: steps.python-setup.outputs.cache-hit != 'true'
+        run: poetry install --with dev
+
+      - name: Run flake8
+        run: poetry run flake8
+
+      - name: Run mypy
+        run: poetry run mypy src
