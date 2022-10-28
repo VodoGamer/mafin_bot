@@ -9,5 +9,5 @@ class Role(ABCRule[CallbackQuery]):
         self.role = role
 
     async def check(self, event: CallbackQuery, ctx: dict):
-        player = await Player.get_or_none(id=event.callback_query.from_.id)
-        return player and player.role == self.role
+        player = await Player.get_or_none(id=event.callback_query.from_.id, role=self.role)
+        return player
