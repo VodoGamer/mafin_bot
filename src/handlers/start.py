@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from random import choice
 
-from telegrinder import Dispatch, Message
+from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.bot.rules import Text
 
 from src.bot.init import api
@@ -49,13 +49,14 @@ async def start_game(game: Game):
         await game.delete()
     await api.send_message(game.chat_id, "start game placeholder!")
     await give_roles(game)
+    await api.send_message(game.chat_id, "night is coming placeholder!")
 
 
 async def give_roles(game: Game):
     players = await Player.filter(game=game)
     mafia_count = len(game.players) // 2
     await give_role(players, mafia_count, Role.mafia)
-    await give_role(players, mafia_count, Role.doctor)
+    await give_role(players, 1, Role.doctor)
 
 
 async def give_role(players: list[Player], count: int, role: Role):
@@ -64,5 +65,15 @@ async def give_role(players: list[Player], count: int, role: Role):
         if not user.role:
             user.role = role
             await user.save()
-            await api.send_message(user.uid, f"{role.value}")
+            await api.send_message(
+                user.uid, f"{role.value}", reply_markup=get_players_keyboard(players)
+            )
             count -= 1
+
+
+def get_players_keyboard(players: list[Player]):
+    KEYBOARD = InlineKeyboard()
+    for player in players:
+        KEYBOARD.add(InlineButton(player.username, callback_data=f"action/{player.id}"))
+        KEYBOARD.row()
+    return KEYBOARD.get_markup()
