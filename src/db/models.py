@@ -31,6 +31,7 @@ class Game(Model):
     start_date: datetime = fields.DatetimeField(auto_now_add=True)
     messages: fields.ReverseRelation["GameMessage"]
     players: fields.ReverseRelation["Player"]
+    actions: fields.ReverseRelation["GameAction"]
 
 
 class GameMessage(Model):
@@ -52,6 +53,27 @@ class Player(Model):
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="players"
     )
+    game_actions: fields.ReverseRelation["GameAction"]
 
     def __str__(self) -> str:
         return self.username
+
+
+class Action(IntEnum):
+    kill = 0
+    revived = 1
+
+
+class GameAction(Model):
+    id: int = fields.IntField(pk=True)
+    type: Action = fields.IntEnumField(Action)
+
+    game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
+        "models.Game", related_name="actions"
+    )
+    player: fields.ForeignKeyRelation[Player] = fields.ForeignKeyField(
+        "models.Player", related_name="game_actions"
+    )
+
+    class Meta:
+        table = "game_action"

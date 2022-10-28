@@ -58,7 +58,9 @@ async def join_in_game(message: Message, game_id: int):
     if player:
         await message.reply(f"alredy in game placeholder {chat.title}")
         return
-    await Player.create(id=message.from_user.id, username=message.from_user.username, game=game)
+    await Player.create(
+        id=message.from_user.id, username=message.from_user.username or "alex", game=game
+    )
     await message.reply(f"join game placeholder {chat.title}")
     await update_players_list(message.api, game)
 

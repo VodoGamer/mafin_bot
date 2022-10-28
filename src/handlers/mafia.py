@@ -15,5 +15,5 @@ async def to_heal(event: CallbackQuery, game_id: int, player_id: int):
         await event.api.edit_message_text(
             event.from_user.id, event.message.message_id, text=f"u choice placeholder: {player_id}"
         )
-    await GameAction.create(game=game, player_id=player_id, type=Action.revived)
-    await event.api.send_message(game.chat_id, "doctor placeholder")
+    await GameAction.create(game=game, player_id=player_id, type=Action.kill)
+    await event.api.send_message(game.chat_id, "mafia placeholder")

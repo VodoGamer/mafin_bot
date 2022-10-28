@@ -2,11 +2,12 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from random import choice
 
-from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
+from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
 
 from src.bot.init import api
 from src.db.models import Game, GameMessage, GameState, MessagePayload, Player, Role
+from src.handlers.night import start_night
 
 dp = Dispatch()
 
@@ -50,6 +51,7 @@ async def start_game(game: Game):
         return
     await api.send_message(game.chat_id, "start game placeholder!")
     await give_roles(game)
+    await start_night(game)
     await api.send_message(game.chat_id, "night is coming placeholder!")
 
 
@@ -66,15 +68,4 @@ async def give_role(players: list[Player], count: int, role: Role):
         if not user.role:
             user.role = role
             await user.save()
-            await api.send_message(
-                user.id, f"{role.value}", reply_markup=get_players_keyboard(players)
-            )
             count -= 1
-
-
-def get_players_keyboard(players: list[Player]):
-    KEYBOARD = InlineKeyboard()
-    for player in players:
-        KEYBOARD.add(InlineButton(player.username, callback_data=f"action/{player.id}"))
-        KEYBOARD.row()
-    return KEYBOARD.get_markup()
