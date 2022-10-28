@@ -1,4 +1,6 @@
+from datetime import datetime
 from enum import Enum, IntEnum
+
 from tortoise import fields
 from tortoise.models import Model
 
@@ -9,8 +11,9 @@ class GameState(IntEnum):
     night = 2
 
 
-class GameMessageType(IntEnum):
+class MessagePayload(IntEnum):
     set_in_game = 0
+    timer = 1
 
 
 class Role(Enum):
@@ -25,13 +28,14 @@ class Game(Model):
     id: int = fields.IntField(pk=True)
     chat_id: int = fields.BigIntField()
     state: GameState = fields.IntEnumField(GameState)
+    start_date: datetime = fields.DatetimeField(auto_now_add=True)
     messages: fields.ReverseRelation["GameMessage"]
     players: fields.ReverseRelation["Player"]
 
 
 class GameMessage(Model):
     message_id: int = fields.IntField()
-    message_type: GameMessageType = fields.IntEnumField(GameMessageType)
+    payload: MessagePayload = fields.IntEnumField(MessagePayload)
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="messages"
     )

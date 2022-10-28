@@ -1,5 +1,6 @@
 from typing import Iterable
-from telegrinder import Message, ABCMessageRule
+
+from telegrinder import ABCMessageRule, Message
 
 
 class Command(ABCMessageRule):

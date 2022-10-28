@@ -8,10 +8,10 @@ packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-telegrinder = "^0.1.dev7"
+telegrinder = "^0.1.dev12"
 tortoise-orm = "^0.19.2"
 aerich = "^0.7.1"
-asyncpg = "^0.26.0"
+asyncpg = "^0.27.0"
 envparse = "^0.2.0"
 
 

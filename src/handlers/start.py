@@ -1,69 +1,16 @@
-from telegrinder import Dispatch, Message, InlineKeyboard, InlineButton, API
-from telegrinder.types import User
-from telegrinder.bot.rules import Text, Markup
-from src.db.models import Game, GameState, Player, GameMessage, GameMessageType
+import asyncio
+from datetime import datetime, timedelta, timezone
 
-from src.rules.command import Command
+from telegrinder import Dispatch
+
+from src.bot.init import api
+from src.db.models import Game
 
 dp = Dispatch()
 
-START_COMMAND = "/start_mafin"
 
-
-@dp.message(Text("/start"))
-async def start(message: Message):
-    await message.reply(f"start placeholder\nдля начала игры введите команду \n{START_COMMAND}")
-
-
-def get_set_in_game_keyboard(me: User, game: Game) -> InlineKeyboard:
-    KEYBOARD = InlineKeyboard()
-    KEYBOARD.add(
-        InlineButton("join placeholder", url=f"https://t.me/{me.username}?start=join_{game.id}")
-    )
-    return KEYBOARD
-
-
-@dp.message(Command(START_COMMAND))
-async def start_set_in_game(message: Message):
-    await message.api.delete_message(message.chat.id, message.message_id)
-    if message.chat.type == "private":
-        await message.reply("Игры в мафины доступны только в чате")
-        return
-
-    game = await Game.get_or_create({"state": GameState.set_in_game}, chat_id=message.chat.id)
-    if game[1]:
-        me = (await message.api.get_me()).unwrap()
-
-        result = await message.answer(
-            "set a game placeholder",
-            reply_markup=get_set_in_game_keyboard(me, game[0]).get_markup(),
-        )
-        await GameMessage.create(
-            game=game,
-            message_id=result.unwrap().message_id,
-            message_type=GameMessageType.set_in_game,
-        )
-
-
-@dp.message(Markup("/start join_<game_id>"))
-async def join_in_game(message: Message, game_id: int):
-    game = await Game.get(id=game_id)
-    player = await Player.get_or_create(
-        {"username": message.from_user.username}, uid=message.from_user.id, game=game
-    )
-    if player[1]:
-        chat = (await message.api.get_chat(game.chat_id)).unwrap()
-        await message.reply(f"join game placeholder {chat.title}")
-        await update_players_list(message.api, game)
-
-
-async def update_players_list(api: API, game: Game):
-    chat_message = await GameMessage.get(game=game, message_type=GameMessageType.set_in_game)
-    players = map(str, await Player.filter(game=game))
-    me = (await api.get_me()).unwrap()
-    await api.edit_message_text(
-        game.chat_id,
-        chat_message.message_id,
-        text=f"set a game placeholder\n{', '.join(players)}",
-        reply_markup=get_set_in_game_keyboard(me, game).get_markup(),
-    )
+async def start_timer_to_the_game(timer: timedelta, game: Game):
+    start_date = game.start_date + timer
+    mention_seconds = round((start_date - datetime.now(tz=timezone.utc)).seconds / 2)
+    await asyncio.sleep(mention_seconds)
+    await api.send_message(game.chat_id, f"before the game placeholder {mention_seconds} секунд")
