@@ -7,7 +7,7 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "id" SERIAL NOT NULL PRIMARY KEY,
     "chat_id" BIGINT NOT NULL,
     "state" SMALLINT NOT NULL,
-    "start_date" TIMESTAMPTZ NOT NULL
+    "start_date" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP
 );
 COMMENT ON COLUMN "game"."state" IS 'set_in_game: 0\nday: 1\nnight: 2';
 CREATE TABLE IF NOT EXISTS "game_message" (
@@ -18,8 +18,7 @@ CREATE TABLE IF NOT EXISTS "game_message" (
 );
 COMMENT ON COLUMN "game_message"."payload" IS 'set_in_game: 0\ntimer: 1';
 CREATE TABLE IF NOT EXISTS "player" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "uid" BIGINT NOT NULL,
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "username" VARCHAR(150) NOT NULL,
     "role" VARCHAR(13),
     "game_id" INT NOT NULL REFERENCES "game" ("id") ON DELETE CASCADE

@@ -38,7 +38,7 @@ async def start_set_in_game(message: Message):
             message_id=result.unwrap().message_id,
             payload=MessagePayload.set_in_game,
         )
-        await start_timer_to_the_game(timedelta(seconds=60), game[0])
+        await start_timer_to_the_game(timedelta(seconds=30), game[0])
 
 
 def get_set_in_game_keyboard(bot: User, game: Game) -> InlineKeyboard:
@@ -52,13 +52,15 @@ def get_set_in_game_keyboard(bot: User, game: Game) -> InlineKeyboard:
 @dp.message(Markup("/start join_<game_id>"))
 async def join_in_game(message: Message, game_id: int):
     game = await Game.get(id=game_id)
-    player = await Player.get_or_create(
-        {"username": message.from_user.username}, uid=message.from_user.id, game=game
-    )
-    if player[1] and game.state == GameState.set_in_game:
-        chat = (await message.api.get_chat(game.chat_id)).unwrap()
-        await message.reply(f"join game placeholder {chat.title}")
-        await update_players_list(message.api, game)
+    player = await Player.get_or_none(id=message.from_user.id)
+    chat = (await message.api.get_chat(game.chat_id)).unwrap()
+
+    if player:
+        await message.reply(f"alredy in game placeholder {chat.title}")
+        return
+    await Player.create(id=message.from_user.id, username=message.from_user.username, game=game)
+    await message.reply(f"join game placeholder {chat.title}")
+    await update_players_list(message.api, game)
 
 
 async def update_players_list(api: API, game: Game):

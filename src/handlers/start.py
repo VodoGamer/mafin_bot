@@ -47,6 +47,7 @@ async def start_game(game: Game):
             game.chat_id, f"not enough players placeholder: {len(game.players)}"
         )
         await game.delete()
+        return
     await api.send_message(game.chat_id, "start game placeholder!")
     await give_roles(game)
     await api.send_message(game.chat_id, "night is coming placeholder!")
@@ -66,7 +67,7 @@ async def give_role(players: list[Player], count: int, role: Role):
             user.role = role
             await user.save()
             await api.send_message(
-                user.uid, f"{role.value}", reply_markup=get_players_keyboard(players)
+                user.id, f"{role.value}", reply_markup=get_players_keyboard(players)
             )
             count -= 1
 

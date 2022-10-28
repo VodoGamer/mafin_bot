@@ -45,8 +45,7 @@ class GameMessage(Model):
 
 
 class Player(Model):
-    id: int = fields.IntField(pk=True)
-    uid: int = fields.BigIntField()
+    id: int = fields.BigIntField(pk=True)
     username: str = fields.CharField(150)
     role: Role | None = fields.CharEnumField(Role, null=True)
 
