@@ -1,7 +1,6 @@
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.types.objects import InlineKeyboardMarkup
 
-
 from src.bot.init import api
 from src.db.models import Game, GameState, Player, Role
 from src.rules import State
@@ -20,9 +19,7 @@ async def start_night(game: Game):
 def get_players_keyboard(game: Game, players: list[Player]) -> InlineKeyboardMarkup:
     KEYBOARD = InlineKeyboard()
     for player in players:
-        KEYBOARD.add(
-            InlineButton(player.username, callback_data=f"game/{game.id}/action/{player.id}")
-        )
+        KEYBOARD.add(InlineButton(player.name, callback_data=f"game/{game.id}/action/{player.id}"))
         KEYBOARD.row()
     return KEYBOARD.get_markup()
 

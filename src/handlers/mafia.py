@@ -1,7 +1,7 @@
 from telegrinder import CallbackQuery, Dispatch
 from telegrinder.bot.rules import CallbackDataMarkup
 
-from src.db.models import Action, GameAction, Game
+from src.db.models import Action, Game, GameAction
 from src.db.models import Role as GameRole
 from src.rules import Role
 

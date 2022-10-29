@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum, IntEnum
 
+from telegrinder.tools import MarkdownFormatter
 from tortoise import fields
 from tortoise.models import Model
 
@@ -47,7 +48,7 @@ class GameMessage(Model):
 
 class Player(Model):
     id: int = fields.BigIntField(pk=True)
-    username: str = fields.CharField(150)
+    name: str = fields.CharField(150)
     role: Role | None = fields.CharEnumField(Role, null=True)
 
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
@@ -56,7 +57,7 @@ class Player(Model):
     game_actions: fields.ReverseRelation["GameAction"]
 
     def __str__(self) -> str:
-        return self.username
+        return MarkdownFormatter(self.name).link(f"tg://user?id={self.id}")
 
 
 class Action(IntEnum):

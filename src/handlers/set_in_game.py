@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from telegrinder import API, Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.bot.rules import Markup, Text
+from telegrinder.tools import MarkdownFormatter
 from telegrinder.types import User
 
 from src.db.models import Game, GameMessage, GameState, MessagePayload, Player
@@ -58,9 +59,7 @@ async def join_in_game(message: Message, game_id: int):
     if player:
         await message.reply(f"alredy in game placeholder {chat.title}")
         return
-    await Player.create(
-        id=message.from_user.id, username=message.from_user.username or "alex", game=game
-    )
+    await Player.create(id=message.from_user.id, name=message.from_user.first_name, game=game)
     await message.reply(f"join game placeholder {chat.title}")
     await update_players_list(message.api, game)
 
@@ -74,4 +73,5 @@ async def update_players_list(api: API, game: Game):
         chat_message.message_id,
         text=f"set a game placeholder\n{', '.join(players)}",
         reply_markup=get_set_in_game_keyboard(me, game).get_markup(),
+        parse_mode=MarkdownFormatter.PARSE_MODE,
     )
