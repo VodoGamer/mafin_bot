@@ -6,7 +6,7 @@ from telegrinder.types import User
 
 from src.db.models import Game, GameMessage, GameState, MessagePayload, Player
 from src.handlers.start import start_timer_to_the_game
-from src.rules.command import Command
+from src.rules import Command
 
 dp = Dispatch()
 

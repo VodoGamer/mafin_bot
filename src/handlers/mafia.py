@@ -3,7 +3,7 @@ from telegrinder.bot.rules import CallbackDataMarkup
 
 from src.db.models import Action, GameAction, Game
 from src.db.models import Role as GameRole
-from src.rules.role import Role
+from src.rules import Role
 
 dp = Dispatch()
 

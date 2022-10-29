@@ -4,7 +4,7 @@ from telegrinder.types.objects import InlineKeyboardMarkup
 
 from src.bot.init import api
 from src.db.models import Game, GameState, Player, Role
-from src.rules.state import State
+from src.rules import State
 
 dp = Dispatch()
 
