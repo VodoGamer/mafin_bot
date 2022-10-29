@@ -17,6 +17,9 @@ async def start_timer_to_the_game(timer: timedelta, game: Game):
     mention_seconds = round((start_date - datetime.now(tz=timezone.utc)).seconds / 2)
 
     await asyncio.sleep(mention_seconds)
+    new_game = await Game.get_or_none(id=game.id)
+    if new_game and new_game.state != GameState.set_in_game:
+        return
     result = await api.send_message(
         game.chat_id, f"before the game placeholder {mention_seconds} секунд"
     )
@@ -24,13 +27,16 @@ async def start_timer_to_the_game(timer: timedelta, game: Game):
         game=game, message_id=result.unwrap().message_id, payload=MessagePayload.timer
     )
     await asyncio.sleep(mention_seconds)
+    new_game = await Game.get(id=game.id)
+    if new_game and new_game.state != GameState.set_in_game:
+        return
     await start_game(game)
 
 
 @dp.message(Text("/start_game"))
 async def force_start(message: Message):
     game = await Game.get_or_none(chat_id=message.chat.id)
-    if game:
+    if game and game.state == GameState.set_in_game:
         await start_game(game)
 
 
@@ -42,6 +48,7 @@ async def start_game(game: Game):
 
     for message in messages:
         await api.delete_message(game.chat_id, message.message_id)
+        await message.delete()
 
     if len(game.players) < 1:
         await api.send_message(
