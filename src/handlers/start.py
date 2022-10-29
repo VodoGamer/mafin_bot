@@ -1,36 +1,13 @@
-import asyncio
-from datetime import datetime, timedelta, timezone
 from random import choice
 
 from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
 
 from src.bot.init import api
-from src.db.models import Game, GameMessage, GameState, MessagePayload, Player, Role
+from src.db.models import Game, GameMessage, GameState, Player, Role
 from src.handlers.night import start_night
 
 dp = Dispatch()
-
-
-async def start_timer_to_the_game(timer: timedelta, game: Game):
-    start_date = game.start_date + timer
-    mention_seconds = round((start_date - datetime.now(tz=timezone.utc)).seconds / 2)
-
-    await asyncio.sleep(mention_seconds)
-    new_game = await Game.get_or_none(id=game.id)
-    if new_game and new_game.state != GameState.set_in_game:
-        return
-    result = await api.send_message(
-        game.chat_id, f"before the game placeholder {mention_seconds} секунд"
-    )
-    await GameMessage.create(
-        game=game, message_id=result.unwrap().message_id, payload=MessagePayload.timer
-    )
-    await asyncio.sleep(mention_seconds)
-    new_game = await Game.get(id=game.id)
-    if new_game and new_game.state != GameState.set_in_game:
-        return
-    await start_game(game)
 
 
 @dp.message(Text("/start_game"))

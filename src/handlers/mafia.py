@@ -8,7 +8,7 @@ from src.rules import Role
 dp = Dispatch()
 
 
-@dp.callback_query(Role(GameRole.doctor), CallbackDataMarkup("game/<game_id>/action/<player_id>"))
+@dp.callback_query(Role(GameRole.mafia), CallbackDataMarkup("game/<game_id>/action/<player_id>"))
 async def to_heal(event: CallbackQuery, game_id: int, player_id: int):
     game = await Game.get(id=game_id)
     if event.message:
