@@ -20,7 +20,7 @@ async def start_day(game: Game):
     await game.save()
     await make_night_actions(game)
     await api.send_message(game.chat_id, "obsyzhdenie placeholder")
-    await asyncio.sleep(30)
+    await asyncio.sleep(20)
     await start_voting(game)
 
 
@@ -39,13 +39,13 @@ async def start_voting(game: Game):
 async def make_night_actions(game):
     kill = await GameAction.get(type=Action.kill).prefetch_related("player")
     await api.send_message(kill.player.id, "u died placeholder")
-    kill.player.role = Role.died
-    await kill.player.save()
     revived = await GameAction.get(type=Action.revived).prefetch_related("player")
     await api.send_message(revived.player.id, "u revived placeholder")
     if kill.player.id == revived.player.id:
         await api.send_message(game.chat_id, "all alive!!! wow!! placeholder")
         return
+    kill.player.role = Role.died
+    await kill.player.save()
     await api.send_message(game.chat_id, f"{kill.player.name} died now!!!")
 
 
