@@ -59,12 +59,13 @@ async def get_set_in_game_keyboard(game: Game) -> InlineKeyboardMarkup:
 @dp.message(Markup("/start join_<game_id>"))
 async def join_in_game(message: Message, game_id: int):
     game = await Game.get(id=game_id)
-    player = await Player.get_or_none(id=message.from_user.id)
-    chat = (await api.get_chat(game.chat_id)).unwrap()
+    player = await Player.get_or_none(id=message.from_user.id).prefetch_related("game")
 
     if player:
+        chat = (await api.get_chat(player.game.chat_id)).unwrap()
         await message.reply(f"alredy in game placeholder {chat.title}")
         return
+    chat = (await api.get_chat(game.chat_id)).unwrap()
     await Player.create(id=message.from_user.id, name=message.from_user.first_name, game=game)
     await message.reply(f"join game placeholder {chat.title}")
     await update_set_in_game_message(game)

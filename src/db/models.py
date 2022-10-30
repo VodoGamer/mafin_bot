@@ -18,6 +18,7 @@ class MessagePayload(IntEnum):
 
 
 class Role(Enum):
+    died = "Мёртв"
     civilian = "Мирный житель"
     don = "Дон"
     mafia = "Мафия"
@@ -60,14 +61,14 @@ class Player(Model):
         return MarkdownFormatter(self.name).link(f"tg://user?id={self.id}")
 
 
-class Action(IntEnum):
-    kill = 0
-    revived = 1
+class Action(Enum):
+    kill = "убили"
+    revived = "возрадили"
 
 
 class GameAction(Model):
     id: int = fields.IntField(pk=True)
-    type: Action = fields.IntEnumField(Action)
+    type: Action = fields.CharEnumField(Action)
 
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="actions"

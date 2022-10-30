@@ -3,13 +3,16 @@ from telegrinder.bot.rules import CallbackDataMarkup
 
 from src.db.models import Action, Game, GameAction
 from src.db.models import Role as GameRole
-from src.rules import Role
+from src.handlers.day import check_actions
+from src.rules import RoleCallback
 
 dp = Dispatch()
 
 
-@dp.callback_query(Role(GameRole.mafia), CallbackDataMarkup("game/<game_id>/action/<player_id>"))
-async def to_heal(event: CallbackQuery, game_id: int, player_id: int):
+@dp.callback_query(
+    RoleCallback(GameRole.mafia), CallbackDataMarkup("game/<game_id>/action/<player_id>")
+)
+async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
     game = await Game.get(id=game_id)
     if event.message:
         await event.api.edit_message_text(
@@ -17,3 +20,4 @@ async def to_heal(event: CallbackQuery, game_id: int, player_id: int):
         )
     await GameAction.create(game=game, player_id=player_id, type=Action.kill)
     await event.api.send_message(game.chat_id, "mafia placeholder")
+    await check_actions(game)
