@@ -28,7 +28,7 @@ async def start_voting(game: Game):
     players = await Player.filter(game=game).exclude(role=Role.died)
     keyboard = InlineKeyboard()
     for player in players:
-        keyboard.add(InlineButton(player.name, callback_data=f"vote/{player.id}"))
+        keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}vote/{player.id}"))
         keyboard.row()
     for player in players:
         await api.send_message(

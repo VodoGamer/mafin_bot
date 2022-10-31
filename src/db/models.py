@@ -34,6 +34,7 @@ class Game(Model):
     messages: fields.ReverseRelation["GameMessage"]
     players: fields.ReverseRelation["Player"]
     actions: fields.ReverseRelation["GameAction"]
+    votes: fields.ReverseRelation["Vote"]
 
 
 class GameMessage(Model):
@@ -51,6 +52,7 @@ class Player(Model):
     id: int = fields.BigIntField(pk=True)
     name: str = fields.CharField(150)
     role: Role | None = fields.CharEnumField(Role, null=True)
+    votes: fields.ReverseRelation["Vote"]
 
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="players"
@@ -59,6 +61,16 @@ class Player(Model):
 
     def __str__(self) -> str:
         return MarkdownFormatter(self.name).link(f"tg://user?id={self.id}")
+
+
+class Vote(Model):
+    id: int = fields.IntField(pk=True)
+    game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
+        "models.Game", related_name="votes"
+    )
+    goal_user: fields.ForeignKeyRelation[Player] = fields.ForeignKeyField(
+        "models.Player", related_name="votes"
+    )
 
 
 class Action(Enum):
