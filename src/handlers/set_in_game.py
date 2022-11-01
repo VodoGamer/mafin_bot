@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.bot.rules import Markup, Text
-from telegrinder.tools import MarkdownFormatter
+from telegrinder.tools import HTMLFormatter, MarkdownFormatter
 from telegrinder.types import InlineKeyboardMarkup
 
 from src.bot.init import api
@@ -17,11 +17,14 @@ SET_IN_GAME_TIME = timedelta(seconds=60)
 
 @dp.message(Text("/start"))
 async def start(message: Message):
-    await message.reply(f"start placeholder\nдля начала игры введите команду \n{START_COMMAND}")
+    await message.reply(
+        f"Для начала игры в {HTMLFormatter('МАФИНЫ').bold()} введите команду {START_COMMAND}",
+        parse_mode=HTMLFormatter.PARSE_MODE,
+    )
 
 
 @dp.message(Command(START_COMMAND))
-async def start_set_in_game(message: Message):
+async def set_in_game_command(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
     if message.chat.type == "private":
         await message.reply("Игры в мафины доступны только в чате")
@@ -34,12 +37,16 @@ async def start_set_in_game(message: Message):
         chat_id=message.chat.id,
     )
     if game[1]:
-        await send_set_in_game_message(message, game[0])
+        await start_set_in_game(message, game[0])
 
 
-async def send_set_in_game_message(message: Message, game: Game):
+async def start_set_in_game(message: Message, game: Game):
     keyboard = await get_set_in_game_keyboard(game)
-    result = await message.answer("set a game placeholder", reply_markup=keyboard)
+    result = await message.answer(
+        f"{MarkdownFormatter('Набор в игру').bold()}\nЧтобы присоединиться нажми на кнопку ниже",
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+        reply_markup=keyboard,
+    )
     await GameMessage.create(
         game=game,
         message_id=result.unwrap().message_id,
@@ -51,7 +58,7 @@ async def get_set_in_game_keyboard(game: Game) -> InlineKeyboardMarkup:
     bot = (await api.get_me()).unwrap()
     KEYBOARD = InlineKeyboard()
     KEYBOARD.add(
-        InlineButton("join placeholder", url=f"https://t.me/{bot.username}?start=join_{game.id}")
+        InlineButton("Присоединиться", url=f"https://t.me/{bot.username}?start=join_{game.id}")
     )
     return KEYBOARD.get_markup()
 
@@ -63,11 +70,18 @@ async def join_in_game(message: Message, game_id: int):
 
     if player:
         chat = (await api.get_chat(player.game.chat_id)).unwrap()
-        await message.reply(f"alredy in game placeholder {chat.title}")
+        await message.reply(
+            f"Ты уже играешь в чате\n{MarkdownFormatter(chat.title).bold()}",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+        )
         return
+
     chat = (await api.get_chat(game.chat_id)).unwrap()
     await Player.create(id=message.from_user.id, name=message.from_user.first_name, game=game)
-    await message.reply(f"join game placeholder {chat.title}")
+    await message.reply(
+        f"Ты присоединился к игре {MarkdownFormatter(chat.title).bold()}",
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+    )
     await update_set_in_game_message(game)
 
 
@@ -79,20 +93,27 @@ async def update_set_in_game_message(game: Game):
     await api.edit_message_text(
         chat_id=game.chat_id,
         message_id=chat_message.message_id,
-        text=f"set a game placeholder:\n{', '.join(players)}",
+        text=f"{MarkdownFormatter('Набор в игру').bold()}\nУчаствуют:\n{', '.join(players)}",
         reply_markup=keyboard,
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
 
 
 async def send_or_update_timer(game: Game, seconds: int):
-    text = "before the game: {} placeholder"
+    text = MarkdownFormatter("До начала игры").bold() + " осталось {} секунд"
 
     timer = await GameMessage.get_or_none(game=game, payload=MessagePayload.timer)
     if timer:
-        await api.edit_message_text(game.chat_id, timer.message_id, text=text.format(seconds))
+        await api.edit_message_text(
+            game.chat_id,
+            timer.message_id,
+            text=text.format(seconds),
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+        )
         return
-    message = await api.send_message(game.chat_id, text.format(seconds))
+    message = await api.send_message(
+        game.chat_id, text.format(seconds), parse_mode=MarkdownFormatter.PARSE_MODE
+    )
     await GameMessage.create(
         game=game, payload=MessagePayload.timer, message_id=message.unwrap().message_id
     )

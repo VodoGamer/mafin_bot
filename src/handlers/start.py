@@ -2,6 +2,7 @@ from random import choice
 
 from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
+from telegrinder.tools import MarkdownFormatter
 
 from src.bot.init import api
 from src.db.models import Game, GameMessage, GameState, Player, Role
@@ -27,16 +28,27 @@ async def start_game(game: Game):
         await api.delete_message(game.chat_id, message.message_id)
         await message.delete()
 
-    if len(game.players) < 1:
+    if len(game.players) < 4:
         await api.send_message(
-            game.chat_id, f"not enough players placeholder: {len(game.players)}"
+            game.chat_id,
+            f"{MarkdownFormatter('Недостаточно игроков').italic()} "
+            f"для начала игры: {len(game.players)}\nДля старта игры необходимо 4 игрока",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
         )
         await game.delete()
         return
-    await api.send_message(game.chat_id, "start game placeholder!")
+    await api.send_message(
+        game.chat_id,
+        MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+    )
     await give_roles(game)
     await start_night(game)
-    await api.send_message(game.chat_id, "night is coming placeholder!")
+    await api.send_message(
+        game.chat_id,
+        MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+    )
 
 
 async def give_roles(game: Game):
