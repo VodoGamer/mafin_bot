@@ -12,20 +12,6 @@ class GameState(IntEnum):
     night = 2
 
 
-class MessagePayload(IntEnum):
-    set_in_game = 0
-    timer = 1
-
-
-class Role(Enum):
-    died = "Мёртв"
-    civilian = "Мирный житель"
-    don = "Дон"
-    mafia = "Мафия"
-    commissioner = "Комиссар"
-    doctor = "Доктор"
-
-
 class Game(Model):
     id: int = fields.IntField(pk=True)
     chat_id: int = fields.BigIntField()
@@ -37,6 +23,11 @@ class Game(Model):
     votes: fields.ReverseRelation["Vote"]
 
 
+class MessagePayload(IntEnum):
+    set_in_game = 0
+    timer = 1
+
+
 class GameMessage(Model):
     message_id: int = fields.IntField()
     payload: MessagePayload = fields.IntEnumField(MessagePayload)
@@ -46,6 +37,15 @@ class GameMessage(Model):
 
     class Meta:
         table = "game_message"
+
+
+class Role(Enum):
+    died = "Мёртв"
+    civilian = "Мирный житель"
+    don = "Дон"
+    mafia = "Мафия"
+    commissioner = "Комиссар"
+    doctor = "Доктор"
 
 
 class Player(Model):
@@ -75,7 +75,7 @@ class Vote(Model):
 
 class Action(Enum):
     kill = "убили"
-    revived = "возрадили"
+    revived = "возродили"
 
 
 class GameAction(Model):
