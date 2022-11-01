@@ -9,6 +9,4 @@ class Command(ABCMessageRule):
 
     async def check(self, message: Message, ctx: dict):
         for command in self.commands:
-            if message.text and message.text.startswith(command):
-                return True
-        return False
+            return message.text and message.text.startswith(command)

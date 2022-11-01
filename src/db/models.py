@@ -60,7 +60,7 @@ class Player(Model):
     game_actions: fields.ReverseRelation["GameAction"]
 
     def __str__(self) -> str:
-        return MarkdownFormatter(self.name).link(f"tg://user?id={self.id}")
+        return MarkdownFormatter(self.name).mention(self.id)
 
 
 class Vote(Model):
