@@ -8,5 +8,4 @@ class State(ABCMessageRule):
         self.state = state
 
     async def check(self, message: Message, ctx: dict):
-        game = await Game.get_or_none(chat_id=message.chat.id, state=self.state)
-        return game
+        return await Game.get_or_none(chat_id=message.chat.id, state=self.state)

@@ -1,4 +1,5 @@
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
+from telegrinder.tools import HTMLFormatter
 from telegrinder.types.objects import InlineKeyboardMarkup
 
 from src.bot.init import api
@@ -15,8 +16,9 @@ async def start_night(game: Game):
             raise ValueError(f"WTF! no player role {player.id}")
         await api.send_message(
             player.id,
-            f"action placeholder {player.role.value}",
+            f"Ты - {HTMLFormatter(player.role.value).bold()}\nвремя ходить",
             reply_markup=get_players_keyboard(game, game.players),
+            parse_mode=HTMLFormatter.PARSE_MODE,
         )
 
 

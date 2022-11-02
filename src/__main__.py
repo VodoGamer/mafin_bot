@@ -3,7 +3,7 @@ import asyncio
 
 from loguru import logger
 
-from src.handlers.timer import send_timers
+from src.handlers.timer import check_timers
 
 from .bot.init import bot
 from .config.db import db_init
@@ -20,7 +20,7 @@ bot.dispatch.message.middlewares.extend([])
 
 loop.run_until_complete(db_init())
 loop.create_task(bot.run_polling())
-loop.create_task(send_timers())
+loop.create_task(check_timers())
 try:
     loop.run_forever()
 except KeyboardInterrupt:

@@ -28,7 +28,7 @@ async def start_game(game: Game):
         await api.delete_message(game.chat_id, message.message_id)
         await message.delete()
 
-    if len(game.players) < 4:
+    if len(game.players) < 1:
         await api.send_message(
             game.chat_id,
             f"{MarkdownFormatter('Недостаточно игроков').italic()} "
@@ -46,7 +46,7 @@ async def start_game(game: Game):
     await start_night(game)
     await api.send_message(
         game.chat_id,
-        MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
+        MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
 
@@ -56,6 +56,10 @@ async def give_roles(game: Game):
     mafia_count = len(game.players) // 2
     await give_role(players, mafia_count, Role.mafia)
     await give_role(players, 1, Role.doctor)
+    players = await Player.filter(game=game, role=None)
+    for player in players:
+        player.role = Role.civilian
+        await player.save()
 
 
 async def give_role(players: list[Player], count: int, role: Role):
