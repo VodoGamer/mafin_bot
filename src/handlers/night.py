@@ -1,6 +1,7 @@
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
-from telegrinder.tools import HTMLFormatter
+from telegrinder.tools import HTMLFormatter, MarkdownFormatter
 from telegrinder.types.objects import InlineKeyboardMarkup
+from tortoise.expressions import Q
 
 from src.bot.init import api
 from src.db.models import Game, GameState, Player, Role
@@ -10,14 +11,23 @@ dp = Dispatch()
 
 
 async def start_night(game: Game):
-    active_roles = await Player.filter(game=game).exclude(role=Role.civilian)
+    await api.send_message(
+        game.chat_id,
+        MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+    )
+
+    active_roles = await Player.filter(game=game).exclude(
+        Q(role=Role.civilian) | Q(role=Role.died)
+    )
+    alive_players = await Player.filter(game=game).exclude(role=Role.died)
     for player in active_roles:
         if not player.role:
             raise ValueError(f"WTF! no player role {player.id}")
         await api.send_message(
             player.id,
             f"Ты - {HTMLFormatter(player.role.value).bold()}\nвремя ходить",
-            reply_markup=get_players_keyboard(game, game.players),
+            reply_markup=get_players_keyboard(game, alive_players),
             parse_mode=HTMLFormatter.PARSE_MODE,
         )
 

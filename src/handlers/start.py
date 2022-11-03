@@ -44,11 +44,6 @@ async def start_game(game: Game):
     )
     await give_roles(game)
     await start_night(game)
-    await api.send_message(
-        game.chat_id,
-        MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
-        parse_mode=MarkdownFormatter.PARSE_MODE,
-    )
 
 
 async def give_roles(game: Game):

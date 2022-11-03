@@ -21,7 +21,7 @@ async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
             event.from_user.id, event.message.message_id, text=f"Ты выбрал: {player}"
         )
     await GameAction.create(game=player.game, player_id=player_id, type=Action.kill)
-    await event.api.send_message(player.game.chat_id, "Мафия решила кого зарезать")
+    await event.api.send_message(player.game.chat_id, "Мафия решила кого-то зарезать")
     await check_actions(player.game)
 
 

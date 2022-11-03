@@ -4,7 +4,8 @@ from telegrinder.tools import MarkdownFormatter
 from tortoise.functions import Count
 
 from src.bot.init import api
-from src.db.models import Game, Player, Role, Vote
+from src.db.models import Game, GameAction, GameState, Player, Role, Vote
+from src.handlers.night import start_night
 
 dp = Dispatch()
 
@@ -21,14 +22,22 @@ async def vote(event: CallbackQuery, game_id: int, player_id: int):
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     await Vote.create(game=player.game, goal_user=player)
-    await check_for_end_voting(player.game)
+    if await check_for_end_voting(player.game):
+        await end_voting(player.game)
+        player.game.state = GameState.night
+        await player.game.save()
+        await GameAction.filter(game=player.game).delete()
+        await Vote.filter(game=player.game).delete()
+        await start_night(player.game)
 
 
 async def check_for_end_voting(game: Game):
     votes = await Vote.filter(game=game).count()
     players = await Player.filter(game=game).exclude(role=Role.died).count()
-    if votes != players:
-        return
+    return votes == players
+
+
+async def end_voting(game: Game):
     most_votes = (
         await Vote.annotate(count=Count("id"))
         .group_by("goal_user_id")
@@ -37,6 +46,12 @@ async def check_for_end_voting(game: Game):
     )
     if most_votes[0][1] == most_votes[1][1]:
         await api.send_message(game.chat_id, "жители не определились")
-        return
-    player = await Player.get(game=game, id=most_votes[0][0])
-    await api.send_message(game.chat_id, f"{player} <- этого лоха повесили ХАВХАВХАВХВАХ")
+    else:
+        player = await Player.get(game=game, id=most_votes[0][0])
+        player.role = Role.died
+        await player.save()
+        await api.send_message(
+            game.chat_id,
+            f"{player} <- этого лоха повесили ХАВХАВХАВХВАХ",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+        )

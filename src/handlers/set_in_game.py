@@ -31,19 +31,20 @@ async def set_in_game_command(message: Message):
         chat_id=message.chat.id,
     )
     if game[1]:
-        await start_set_in_game(message, game[0])
+        await start_set_in_game(game[0])
 
 
-async def start_set_in_game(message: Message, game: Game):
+async def start_set_in_game(game: Game):
     keyboard = await get_set_in_game_markup(game)
-    result = await message.answer(
-        set_game_0_players.text,
+    message = await api.send_message(
+        chat_id=game.chat_id,
+        text=set_game_0_players.text,
         parse_mode=set_game_0_players.PARSE_MODE,
         reply_markup=keyboard,
     )
     await GameMessage.create(
         game=game,
-        message_id=result.unwrap().message_id,
+        message_id=message.unwrap().message_id,
         payload=MessagePayload.set_in_game,
     )
 

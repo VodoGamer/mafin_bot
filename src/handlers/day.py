@@ -1,6 +1,7 @@
 import asyncio
 
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
+from tortoise.expressions import Q
 
 from src.bot.init import api
 from src.db.models import Action, Game, GameAction, GameState, Player, Role
@@ -36,21 +37,23 @@ async def start_voting(game: Game):
         )
 
 
-async def make_night_actions(game):
-    kill = await GameAction.get(type=Action.kill).prefetch_related("player")
-    await api.send_message(kill.player.id, "u died placeholder")
-    revived = await GameAction.get(type=Action.revived).prefetch_related("player")
-    await api.send_message(revived.player.id, "u revived placeholder")
-    if kill.player.id == revived.player.id:
-        await api.send_message(game.chat_id, "all alive!!! wow!! placeholder")
+async def make_night_actions(game: Game):
+    killed = await GameAction.get_or_none(type=Action.kill, game=game).prefetch_related("player")
+    revived = await GameAction.get_or_none(type=Action.revived, game=game).prefetch_related(
+        "player"
+    )
+    if not killed or (revived and revived.player == killed.player):
+        await api.send_message(game.chat_id, "Все выжили!")
         return
-    kill.player.role = Role.died
-    await kill.player.save()
-    await api.send_message(game.chat_id, f"{kill.player.name} died now!!!")
+    killed.player.role = Role.died
+    await killed.player.save()
+    await api.send_message(game.chat_id, f"{killed.player} умер!")
 
 
 async def check_actions(game: Game):
-    active_roles = await Player.filter(game=game).exclude(role=Role.civilian)
+    active_roles = await Player.filter(game=game).exclude(
+        Q(role=Role.civilian) | Q(role=Role.died)
+    )
     actions = await GameAction.filter(game=game)
     if len(active_roles) == len(actions):
         await start_day(game)
