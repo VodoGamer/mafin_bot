@@ -5,12 +5,15 @@ from tortoise.expressions import Q
 
 from src.bot.init import api
 from src.db.models import Game, GameState, Player, Role
+from src.handlers.end import check_for_the_end
 from src.rules import State
 
 dp = Dispatch()
 
 
 async def start_night(game: Game):
+    if await check_for_the_end(game):
+        return
     await api.send_message(
         game.chat_id,
         MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),

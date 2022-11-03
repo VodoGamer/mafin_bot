@@ -1,3 +1,4 @@
+from loguru import logger
 from telegrinder import CallbackQuery, Dispatch
 from telegrinder.rules import CallbackDataMarkup
 from telegrinder.tools import MarkdownFormatter
@@ -44,14 +45,13 @@ async def end_voting(game: Game):
         .order_by("-count")
         .values_list("goal_user_id", "count")
     )
-    if most_votes[0][1] == most_votes[1][1]:
+    logger.debug(most_votes)
+    if len(most_votes) > 1 and most_votes[0][1] == most_votes[1][1]:
         await api.send_message(game.chat_id, "жители не определились")
     else:
         player = await Player.get(game=game, id=most_votes[0][0])
         player.role = Role.died
         await player.save()
         await api.send_message(
-            game.chat_id,
-            f"{player} <- этого лоха повесили ХАВХАВХАВХВАХ",
-            parse_mode=MarkdownFormatter.PARSE_MODE,
+            game.chat_id, f"вешаем {player}", parse_mode=MarkdownFormatter.PARSE_MODE
         )
