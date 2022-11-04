@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from loguru import logger
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.bot.rules import Markup
 from telegrinder.tools import MarkdownFormatter
@@ -24,17 +25,20 @@ async def start(message: Message):
 @dp.message(ChatCommand(START_COMMAND))
 async def set_in_game_command(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
+    logger.debug("started")
     game = await Game.get_or_create(
         {
             "state": GameState.set_in_game,
         },
         chat_id=message.chat.id,
     )
+    logger.debug(f"{game[0].chat_id} | {game=}")
     if game[1]:
-        await start_set_in_game(game[0])
+        await set_in_game(game[0])
 
 
-async def start_set_in_game(game: Game):
+async def set_in_game(game: Game):
+    logger.debug(f"started for {game.chat_id = }")
     keyboard = await get_set_in_game_markup(game)
     message = await api.send_message(
         chat_id=game.chat_id,
@@ -61,6 +65,7 @@ async def get_set_in_game_markup(game: Game) -> InlineKeyboardMarkup:
 @dp.message(Markup("/start join_<game_id>"))
 async def join_in_game(message: Message, game_id: int):
     game = await Game.get(id=game_id)
+    logger.debug(f"from {message.from_user.id} to {game=}")
     player = await Player.get_or_none(id=message.from_user.id).prefetch_related("game")
 
     if player:
@@ -77,13 +82,16 @@ async def join_in_game(message: Message, game_id: int):
         f"Ты присоединился к игре {MarkdownFormatter(chat.title).bold()}",
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
+    logger.debug(f"{message.from_user.id} successfully join in the {game=}")
     await update_set_in_game_message(game)
 
 
 async def update_set_in_game_message(game: Game):
+    logger.debug("started")
     message = await GameMessage.get(game=game, payload=MessagePayload.set_in_game)
     keyboard = await get_set_in_game_markup(game)
     players = map(str, await Player.filter(game=game))
+    logger.debug(f"{game=} players now: {players}")
 
     await api.edit_message_text(
         chat_id=game.chat_id,
@@ -92,3 +100,4 @@ async def update_set_in_game_message(game: Game):
         reply_markup=keyboard,
         parse_mode=set_game_with_players.PARSE_MODE,
     )
+    logger.debug("end")

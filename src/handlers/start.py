@@ -1,5 +1,6 @@
 from random import choice
 
+from loguru import logger
 from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
 from telegrinder.tools import MarkdownFormatter
@@ -13,12 +14,14 @@ dp = Dispatch()
 
 @dp.message(Text("/start_game"))
 async def force_start(message: Message):
+    await api.delete_message(message.chat.id, message.message_id)
     game = await Game.get_or_none(chat_id=message.chat.id)
     if game and game.state == GameState.set_in_game:
         await start_game(game)
 
 
 async def start_game(game: Game):
+    logger.debug("started")
     game = await game.get(id=game.id).prefetch_related("players")
     game.state = GameState.night
     await game.save()
@@ -47,6 +50,7 @@ async def start_game(game: Game):
 
 
 async def give_roles(game: Game):
+    logger.debug("started")
     players = await Player.filter(game=game)
     mafia_count = len(game.players) // 2
     await give_role(players, mafia_count, Role.mafia)
@@ -60,7 +64,9 @@ async def give_roles(game: Game):
 async def give_role(players: list[Player], count: int, role: Role):
     while count > 0:
         user = choice(players)
-        if not user.role:
-            user.role = role
-            await user.save()
-            count -= 1
+        if user.role:
+            continue
+        user.role = role
+        await user.save()
+        logger.debug(f"give {role=} for {user=}")
+        count -= 1

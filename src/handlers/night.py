@@ -1,3 +1,4 @@
+from loguru import logger
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import HTMLFormatter, MarkdownFormatter
 from telegrinder.types.objects import InlineKeyboardMarkup
@@ -12,6 +13,7 @@ dp = Dispatch()
 
 
 async def start_night(game: Game):
+    logger.debug("started")
     if await check_for_the_end(game):
         return
     await api.send_message(
@@ -23,7 +25,9 @@ async def start_night(game: Game):
     active_roles = await Player.filter(game=game).exclude(
         Q(role=Role.civilian) | Q(role=Role.died)
     )
+    logger.debug(f"{active_roles=} now; send action messages for them")
     alive_players = await Player.filter(game=game).exclude(role=Role.died)
+    logger.debug(f"{alive_players=} now")
     for player in active_roles:
         if not player.role:
             raise ValueError(f"WTF! no player role {player.id}")
@@ -44,6 +48,5 @@ def get_players_keyboard(game: Game, players: list[Player]) -> InlineKeyboardMar
 
 
 @dp.message(State(GameState.night))
-async def night(message: Message):
-    ...
-    # await message.api.delete_message(message.chat.id, message.message_id)
+async def delete_nights_messages(message: Message):
+    await message.api.delete_message(message.chat.id, message.message_id)
