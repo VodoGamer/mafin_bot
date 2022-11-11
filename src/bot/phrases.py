@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-from telegrinder.tools import HTMLFormatter, MarkdownFormatter
+from telegrinder.tools import MarkdownFormatter
 
 
 class Phrase(NamedTuple):
@@ -13,8 +13,9 @@ SET_GAME_COMMAND = "/set_in_game"
 
 # commands
 start_command = Phrase(
-    f"Для начала игры в {HTMLFormatter('МАФИНЫ').bold()} введите команду {SET_GAME_COMMAND}",
-    HTMLFormatter.PARSE_MODE,
+    f"Для начала игры в {MarkdownFormatter('МАФИНЫ').bold()} введите команду "
+    f"{MarkdownFormatter(SET_GAME_COMMAND).escape()}",
+    MarkdownFormatter.PARSE_MODE,
 )
 set_game_0_players = Phrase(
     f"{MarkdownFormatter('Набор в игру').bold()}\nЧтобы присоединиться нажми на кнопку ниже",

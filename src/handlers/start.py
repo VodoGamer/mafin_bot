@@ -4,9 +4,10 @@ from loguru import logger
 from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
 from telegrinder.tools import MarkdownFormatter
+from tortoise import fields
 
 from src.bot.init import api
-from src.db.models import Game, GameMessage, GameState, Player, Role
+from src.db.models import Game, GameState, Player, Role
 from src.handlers.night import start_night
 
 dp = Dispatch()
@@ -15,19 +16,21 @@ dp = Dispatch()
 @dp.message(Text("/start_game"))
 async def force_start(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
-    game = await Game.get_or_none(chat_id=message.chat.id)
+    game = await Game.get_or_none(chat_id=message.chat.id).prefetch_related("players", "messages")
     if game and game.state == GameState.set_in_game:
         await start_game(game)
 
 
 async def start_game(game: Game):
-    logger.debug("started")
-    game = await game.get(id=game.id).prefetch_related("players")
+    """начинает игру
+
+    Args:
+        game (Game): должен быть `.prefetch_related("players", "messages")`
+    """
     game.state = GameState.night
     await game.save()
-    messages = await GameMessage.filter(game=game)
 
-    for message in messages:
+    for message in game.messages:
         await api.delete_message(game.chat_id, message.message_id)
         await message.delete()
 
@@ -50,21 +53,19 @@ async def start_game(game: Game):
 
 
 async def give_roles(game: Game):
-    logger.debug("started")
-    players = await Player.filter(game=game)
+    """
+    Args:
+        game (Game): должен быть `.prefetch_related("players")`
+    """
     mafia_count = len(game.players) // 2
-    await give_role(players, mafia_count, Role.mafia)
-    await give_role(players, 1, Role.doctor)
-    players = await Player.filter(game=game, role=None)
-    for player in players:
-        player.role = Role.civilian
-        await player.save()
+    await give_role(game.players, mafia_count, Role.mafia)
+    await give_role(game.players, 1, Role.doctor)
 
 
-async def give_role(players: list[Player], count: int, role: Role):
+async def give_role(players: fields.ReverseRelation[Player], count: int, role: Role):
     while count > 0:
         user = choice(players)
-        if user.role:
+        if user.role != Role.civilian:
             continue
         user.role = role
         await user.save()

@@ -19,10 +19,10 @@ async def vote(event: CallbackQuery, game_id: int, player_id: int):
     await api.edit_message_text(
         event.from_user.id,
         event.message.message_id,
-        text=f"u choice {str(player)}",
+        text=f"ты проголосовал за: {str(player)}",
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
-    await Vote.create(game=player.game, goal_user=player)
+    await Vote.create(game_id=game_id, goal_user=player)
     if await check_for_end_voting(player.game):
         await end_voting(player.game)
         player.game.state = GameState.night

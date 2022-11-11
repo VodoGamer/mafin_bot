@@ -13,7 +13,6 @@ dp = Dispatch()
 
 
 async def start_night(game: Game):
-    logger.debug("started")
     if await check_for_the_end(game):
         return
     await api.send_message(
@@ -34,14 +33,18 @@ async def start_night(game: Game):
         await api.send_message(
             player.id,
             f"Ты - {HTMLFormatter(player.role.value).bold()}\nвремя ходить",
-            reply_markup=get_players_keyboard(game, alive_players),
+            reply_markup=get_players_keyboard(game, player, alive_players),
             parse_mode=HTMLFormatter.PARSE_MODE,
         )
 
 
-def get_players_keyboard(game: Game, players: list[Player]) -> InlineKeyboardMarkup:
+def get_players_keyboard(
+    game: Game, active_player: Player, players: list[Player]
+) -> InlineKeyboardMarkup:
     KEYBOARD = InlineKeyboard()
     for player in players:
+        if active_player.role == Role.mafia and player.id == active_player.id:
+            continue
         KEYBOARD.add(InlineButton(player.name, callback_data=f"game/{game.id}/action/{player.id}"))
         KEYBOARD.row()
     return KEYBOARD.get_markup()

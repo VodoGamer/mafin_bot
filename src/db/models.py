@@ -51,7 +51,7 @@ class Role(Enum):
 class Player(Model):
     id: int = fields.BigIntField(pk=True)
     name: str = fields.CharField(150)
-    role: Role | None = fields.CharEnumField(Role, null=True)
+    role: Role = fields.CharEnumField(Role, default=Role.civilian)
     votes: fields.ReverseRelation["Vote"]
 
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(

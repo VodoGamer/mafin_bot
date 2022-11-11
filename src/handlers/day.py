@@ -14,8 +14,7 @@ dp = Dispatch()
 
 @dp.message(State(GameState.day), RoleRule(Role.died))
 async def day(message: Message):
-    ...
-    # await api.delete_message(message.chat.id, message.message_id)
+    await api.delete_message(message.chat.id, message.message_id)
 
 
 async def start_day(game: Game):
