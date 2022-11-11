@@ -23,6 +23,7 @@ isort = "^5.10.1"
 mypy = "^0.982"
 autopep8 = "^1.7.0"
 tortoise-cli = "^0.1.1"
+pyright = "^1.1.279"
 
 
 [tool.aerich]
