@@ -33,3 +33,6 @@ jobs:
 
       - name: Run pyright
         run: poetry run pyright src
+
+      - name: Run pylint
+        run: poetry run pylint src

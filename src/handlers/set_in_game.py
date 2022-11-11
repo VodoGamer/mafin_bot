@@ -53,11 +53,11 @@ async def set_in_game(game: Game):
 
 async def get_set_in_game_markup(game: Game) -> InlineKeyboardMarkup:
     bot = (await api.get_me()).unwrap()
-    KEYBOARD = InlineKeyboard()
-    KEYBOARD.add(
+    keyboard = InlineKeyboard()
+    keyboard.add(
         InlineButton("Присоединиться", url=f"https://t.me/{bot.username}?start=join_{game.id}")
     )
-    return KEYBOARD.get_markup()
+    return keyboard.get_markup()
 
 
 @dp.message(Markup("/start join_<game_id>"))

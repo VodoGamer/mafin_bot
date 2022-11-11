@@ -24,6 +24,7 @@ mypy = "^0.982"
 autopep8 = "^1.7.0"
 tortoise-cli = "^0.1.1"
 pyright = "^1.1.279"
+pylint = "^2.15.5"
 
 
 [tool.aerich]
@@ -46,3 +47,6 @@ line_length = 99
 ignore_missing_imports = true
 follow_imports_for_stubs = false
 ignore_missing_imports_per_module = true
+
+[tool.pylint."messages control"]
+disable = ["C0115", "C0114", "C0116"]

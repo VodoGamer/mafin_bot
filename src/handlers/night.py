@@ -41,13 +41,13 @@ async def start_night(game: Game):
 def get_players_keyboard(
     game: Game, active_player: Player, players: list[Player]
 ) -> InlineKeyboardMarkup:
-    KEYBOARD = InlineKeyboard()
+    keyboard = InlineKeyboard()
     for player in players:
         if active_player.role == Role.mafia and player.id == active_player.id:
             continue
-        KEYBOARD.add(InlineButton(player.name, callback_data=f"game/{game.id}/action/{player.id}"))
-        KEYBOARD.row()
-    return KEYBOARD.get_markup()
+        keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}/action/{player.id}"))
+        keyboard.row()
+    return keyboard.get_markup()
 
 
 @dp.message(State(GameState.night))
