@@ -1,5 +1,6 @@
 import asyncio
 
+from loguru import logger
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import MarkdownFormatter
 from tortoise.expressions import Q
@@ -38,6 +39,13 @@ async def start_voting(game: Game):
         await api.send_message(
             player.id, "голосование кого кикнуть:", reply_markup=keyboard.get_markup()
         )
+    bot = (await api.get_me()).unwrap().username
+    keyboard = InlineKeyboard().add(InlineButton("Перейти к боту", f"https://t.me/{bot}/"))
+    logger.debug(keyboard)
+    logger.debug(keyboard.get_markup())
+    await api.send_message(
+        game.chat_id, "Начато голосование за кик: ", reply_markup=keyboard.get_markup()
+    )
 
 
 async def make_night_actions(game: Game):

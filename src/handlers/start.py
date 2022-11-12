@@ -57,7 +57,7 @@ async def give_roles(game: Game):
     Args:
         game (Game): должен быть `.prefetch_related("players")`
     """
-    mafia_count = len(game.players) // 2
+    mafia_count = len(game.players) // 3
     await give_role(game.players, mafia_count, Role.mafia)
     await give_role(game.players, 1, Role.doctor)
 
