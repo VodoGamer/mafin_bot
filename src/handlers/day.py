@@ -41,16 +41,21 @@ async def start_voting(game: Game):
 
 
 async def make_night_actions(game: Game):
-    killed = await GameAction.get_or_none(type=Action.kill, game=game).prefetch_related("player")
+    killed_users = await GameAction.filter(type=Action.kill, game=game).prefetch_related("player")
     revived = await GameAction.get_or_none(type=Action.revived, game=game).prefetch_related(
         "player"
     )
-    if not killed or (revived and revived.player == killed.player):
+    killed_count = 0
+    for user in killed_users:
+        if revived and revived.player.id == user.player.id:
+            continue
+        killed_count += 1
+        user.player.role = Role.died
+        await user.player.save()
+        await api.send_message(game.chat_id, f"{user.player} умер!", MarkdownFormatter.PARSE_MODE)
+    if killed_count == 0:
         await api.send_message(game.chat_id, "Все выжили!")
         return
-    killed.player.role = Role.died
-    await killed.player.save()
-    await api.send_message(game.chat_id, f"{killed.player} умер!", MarkdownFormatter.PARSE_MODE)
 
 
 async def check_actions(game: Game):

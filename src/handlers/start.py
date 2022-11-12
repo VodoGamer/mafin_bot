@@ -27,22 +27,22 @@ async def start_game(game: Game):
     Args:
         game (Game): должен быть `.prefetch_related("players", "messages")`
     """
-    game.state = GameState.night
-    await game.save()
-
     for message in game.messages:
         await api.delete_message(game.chat_id, message.message_id)
         await message.delete()
 
-    if len(game.players) < 1:
+    if len(game.players) < 2:
         await api.send_message(
             game.chat_id,
-            f"{MarkdownFormatter('Недостаточно игроков').italic()} "
-            f"для начала игры: {len(game.players)}\nДля старта игры необходимо 4 игрока",
+            f"{MarkdownFormatter('Никто не пришёл').italic()} "
+            f"{MarkdownFormatter('на сходку(((').escape()}\n{len(game.players)}\nДля старта игры"
+            " необходимо 4 игрока",
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
         await game.delete()
         return
+    game.state = GameState.night
+    await game.save()
     await api.send_message(
         game.chat_id,
         MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),

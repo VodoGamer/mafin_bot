@@ -87,8 +87,9 @@ async def join_in_game(message: Message, game_id: int):
 async def update_set_in_game_message(game: Game):
     message = await GameMessage.get(game=game, payload=MessagePayload.set_in_game)
     keyboard = await get_set_in_game_markup(game)
-    players = map(str, await Player.filter(game=game))
+    players = await Player.filter(game=game)
     logger.debug(f"{game=} players now: {players}")
+    players = map(str, players)
 
     await api.edit_message_text(
         chat_id=game.chat_id,

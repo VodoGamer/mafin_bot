@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timezone
 
+from loguru import logger
 from telegrinder.tools import MarkdownFormatter
 
 from src.bot.init import api
@@ -11,7 +12,10 @@ from src.handlers.start import start_game
 
 async def check_timers():
     while True:
-        games = await Game.filter(state=GameState.set_in_game)
+        games = await Game.filter(state=GameState.set_in_game).prefetch_related(
+            "players", "messages"
+        )
+        logger.debug(f"{games=}")
         for game in games:
             now = datetime.now(tz=timezone.utc)
             start_date = game.start_date + SET_IN_GAME_TIME
