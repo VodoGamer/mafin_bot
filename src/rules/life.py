@@ -1,7 +1,6 @@
 from telegrinder import ABCMessageRule, ABCRule, CallbackQuery, Message
 
-from src.db.models import Player
-from src.db.models import Life
+from src.db.models import Life, Player
 
 
 class LifeCallback(ABCRule[CallbackQuery]):

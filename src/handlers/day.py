@@ -5,9 +5,19 @@ from telegrinder.tools import MarkdownFormatter
 from tortoise.expressions import Q
 
 from src.bot.init import api
-from src.db.models import Action, Game, GameAction, GameState, Player, Role, Life
+from src.db.models import (
+    Action,
+    Game,
+    GameAction,
+    GameMessage,
+    GameState,
+    Life,
+    MessagePayload,
+    Player,
+    Role,
+)
 from src.handlers.end import check_for_the_end
-from src.rules import State, LifeRule
+from src.rules import LifeRule, State
 
 dp = Dispatch()
 
@@ -18,6 +28,10 @@ async def day(message: Message):
 
 
 async def start_day(game: Game):
+    messages = await GameMessage.filter(game=game, payload=MessagePayload.night_action)
+    for message in messages:
+        await api.delete_message(message.chat_id, message.message_id)
+        await message.delete()
     game.state = GameState.day
     await game.save()
     await make_night_actions(game)

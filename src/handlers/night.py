@@ -5,7 +5,7 @@ from telegrinder.types.objects import InlineKeyboardMarkup
 from tortoise.expressions import Q
 
 from src.bot.init import api
-from src.db.models import Game, GameState, Life, Player, Role
+from src.db.models import Game, GameMessage, GameState, Life, MessagePayload, Night, Player, Role
 from src.handlers.day import get_keyboard_to_bot
 from src.handlers.end import check_for_the_end
 from src.rules import State
@@ -16,6 +16,7 @@ dp = Dispatch()
 async def start_night(game: Game):
     if await check_for_the_end(game):
         return
+    await Night.create(game=game)
     keyboard = await get_keyboard_to_bot()
     await api.send_message(
         game.chat_id,
@@ -33,11 +34,17 @@ async def start_night(game: Game):
     for player in active_roles:
         if not player.role:
             raise ValueError(f"WTF! no player role {player.id}")
-        await api.send_message(
+        result = await api.send_message(
             player.id,
             f"Ты - {HTMLFormatter(player.role.value).bold()}\nвремя ходить",
             reply_markup=get_players_keyboard(game, player, alive_players),
             parse_mode=HTMLFormatter.PARSE_MODE,
+        )
+        await GameMessage.create(
+            message_id=result.unwrap().message_id,
+            payload=MessagePayload.night_action,
+            game=game,
+            chat_id=player.id,
         )
 
 

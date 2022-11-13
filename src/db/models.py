@@ -21,11 +21,13 @@ class Game(Model):
     players: fields.ReverseRelation["Player"]
     actions: fields.ReverseRelation["GameAction"]
     votes: fields.ReverseRelation["Vote"]
+    nights: fields.ReverseRelation["Night"]
 
 
 class MessagePayload(IntEnum):
     set_in_game = 0
     timer = 1
+    night_action = 2
 
 
 class GameMessage(Model):
@@ -34,6 +36,7 @@ class GameMessage(Model):
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="messages"
     )
+    chat_id: int | None = fields.BigIntField(null=True)
 
     class Meta:
         table = "game_message"
@@ -96,3 +99,11 @@ class GameAction(Model):
 
     class Meta:
         table = "game_action"
+
+
+class Night(Model):
+    id: int = fields.IntField(pk=True)
+    start_date: datetime = fields.DatetimeField(auto_now_add=True)
+    game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
+        "models.Game", related_name="nights"
+    )
