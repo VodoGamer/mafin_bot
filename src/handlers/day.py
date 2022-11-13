@@ -7,6 +7,7 @@ from tortoise.expressions import Q
 from src.bot.init import api
 from src.db.models import (
     Action,
+    Day,
     Game,
     GameAction,
     GameMessage,
@@ -28,6 +29,7 @@ async def day(message: Message):
 
 
 async def start_day(game: Game):
+    await Day.create(game=game)
     messages = await GameMessage.filter(game=game, payload=MessagePayload.night_action)
     for message in messages:
         await api.delete_message(message.chat_id, message.message_id)
@@ -49,8 +51,14 @@ async def start_voting(game: Game):
         keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}/vote/{player.id}"))
         keyboard.row()
     for player in players:
-        await api.send_message(
+        result = await api.send_message(
             player.id, "голосование кого кикнуть:", reply_markup=keyboard.get_markup()
+        )
+        await GameMessage.create(
+            message_id=result.unwrap().message_id,
+            payload=MessagePayload.voting,
+            chat_id=player.id,
+            game=game,
         )
     keyboard = await get_keyboard_to_bot()
     await api.send_message(

@@ -5,10 +5,11 @@ from loguru import logger
 from telegrinder.tools import MarkdownFormatter
 
 from src.bot.init import api
-from src.db.models import Game, GameMessage, GameState, MessagePayload, Night
+from src.db.models import Day, Game, GameMessage, GameState, MessagePayload, Night
 from src.handlers.day import start_day
 from src.handlers.set_in_game import SET_IN_GAME_TIME
 from src.handlers.start import start_game
+from src.handlers.voting import end_day
 
 
 async def check_timers():
@@ -23,11 +24,18 @@ async def check_timers():
                     await start_game(game)
                 elif start_date - now <= SET_IN_GAME_TIME / 2:
                     await send_or_update_timer(game, (start_date - now).seconds)
+
             elif game.state == GameState.night:
                 night = await Night.filter(game=game).order_by("-id").first()
                 if night and night.start_date + timedelta(seconds=60) <= now:
                     logger.debug(f"{night=} {night.start_date=}")
                     await start_day(game)
+
+            elif game.state == GameState.day:
+                day = await Day.filter(game=game).order_by("-id").first()
+                if day and day.start_date + timedelta(seconds=60) <= now:
+                    logger.debug(f"{day=} {day.start_date=}")
+                    await end_day(game)
         await asyncio.sleep(10)
 
 

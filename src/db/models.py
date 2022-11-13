@@ -22,12 +22,14 @@ class Game(Model):
     actions: fields.ReverseRelation["GameAction"]
     votes: fields.ReverseRelation["Vote"]
     nights: fields.ReverseRelation["Night"]
+    days: fields.ReverseRelation["Day"]
 
 
 class MessagePayload(IntEnum):
     set_in_game = 0
     timer = 1
     night_action = 2
+    voting = 3
 
 
 class GameMessage(Model):
@@ -106,4 +108,12 @@ class Night(Model):
     start_date: datetime = fields.DatetimeField(auto_now_add=True)
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
         "models.Game", related_name="nights"
+    )
+
+
+class Day(Model):
+    id: int = fields.IntField(pk=True)
+    start_date: datetime = fields.DatetimeField(auto_now_add=True)
+    game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
+        "models.Game", related_name="days"
     )
