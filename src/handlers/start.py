@@ -57,9 +57,10 @@ async def give_roles(game: Game):
     Args:
         game (Game): должен быть `.prefetch_related("players")`
     """
-    mafia_count = len(game.players) // 3
-    await give_role(game.players, mafia_count, Role.mafia)
+    await give_role(game.players, 1, Role.don)
     await give_role(game.players, 1, Role.doctor)
+    mafia_count = len(game.players) // 4 - 1
+    await give_role(game.players, mafia_count, Role.mafia)
 
 
 async def give_role(players: fields.ReverseRelation[Player], count: int, role: Role):

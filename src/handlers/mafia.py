@@ -12,7 +12,7 @@ dp = Dispatch()
 
 
 @dp.callback_query(
-    RoleCallback(GameRole.mafia), CallbackDataMarkup("game/<game_id>/action/<player_id>")
+    RoleCallback(GameRole.don), CallbackDataMarkup("game/<game_id>/action/<player_id>")
 )
 async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
     player = await Player.get(id=player_id, game_id=game_id).prefetch_related("game")
@@ -28,7 +28,7 @@ async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
     await check_actions(player.game)
 
 
-@dp.message(IsPrivate(), RoleRule(GameRole.mafia))
+@dp.message(IsPrivate(), RoleRule(GameRole.don))
 async def mafia_communication(message: Message):
     if not message.text:
         return

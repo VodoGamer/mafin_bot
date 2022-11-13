@@ -1,6 +1,7 @@
 from loguru import logger
 from telegrinder import Dispatch
 from telegrinder.tools import MarkdownFormatter
+from tortoise.expressions import Q
 
 from src.bot.init import api
 from src.db.models import Game, Life, Player, Role
@@ -14,7 +15,9 @@ async def check_for_the_end(game: Game):
         f"{MarkdownFormatter(player.name).mention(player.id)} – {player.role.value}"
         for player in await Player.filter(game=game)
     ]
-    mafia = await Player.filter(game=game, role=Role.mafia).exclude(life=Life.died).count()
+    mafia = await Player.filter(
+        Q(game=game) & (Q(role=Role.mafia) | Q(role=Role.don)) & ~Q(life=Life.died)
+    ).count()
     logger.debug(f"{alive_players=} and {mafia=} alive now")
     if mafia <= 0:
         await api.send_message(
