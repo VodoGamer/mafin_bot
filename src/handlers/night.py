@@ -5,7 +5,7 @@ from telegrinder.types.objects import InlineKeyboardMarkup
 from tortoise.expressions import Q
 
 from src.bot.init import api
-from src.db.models import Game, GameState, Player, Role
+from src.db.models import Game, GameState, Life, Player, Role
 from src.handlers.day import get_keyboard_to_bot
 from src.handlers.end import check_for_the_end
 from src.rules import State
@@ -25,10 +25,10 @@ async def start_night(game: Game):
     )
 
     active_roles = await Player.filter(game=game).exclude(
-        Q(role=Role.civilian) | Q(role=Role.died)
+        Q(role=Role.civilian) | Q(life=Life.died)
     )
     logger.debug(f"{active_roles=} now; send action messages for them")
-    alive_players = await Player.filter(game=game).exclude(role=Role.died)
+    alive_players = await Player.filter(game=game).exclude(life=Life.died)
     logger.debug(f"{alive_players=} now")
     for player in active_roles:
         if not player.role:

@@ -5,7 +5,7 @@ from telegrinder.tools import MarkdownFormatter
 from tortoise.functions import Count
 
 from src.bot.init import api
-from src.db.models import Game, GameAction, GameState, Player, Role, Vote
+from src.db.models import Game, GameAction, GameState, Life, Player, Vote
 from src.handlers.night import start_night
 
 dp = Dispatch()
@@ -34,7 +34,7 @@ async def vote(event: CallbackQuery, game_id: int, player_id: int):
 
 async def check_for_end_voting(game: Game):
     votes = await Vote.filter(game=game).count()
-    players = await Player.filter(game=game).exclude(role=Role.died).count()
+    players = await Player.filter(game=game).exclude(life=Life.died).count()
     return votes == players
 
 
@@ -50,7 +50,7 @@ async def end_voting(game: Game):
         await api.send_message(game.chat_id, "жители не определились")
     else:
         player = await Player.get(game=game, id=most_votes[0][0])
-        player.role = Role.died
+        player.life = Life.died
         await player.save()
         await api.send_message(
             game.chat_id, f"вешаем {player}", parse_mode=MarkdownFormatter.PARSE_MODE

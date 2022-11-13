@@ -5,14 +5,14 @@ from telegrinder.tools import MarkdownFormatter
 from tortoise.expressions import Q
 
 from src.bot.init import api
-from src.db.models import Action, Game, GameAction, GameState, Player, Role
+from src.db.models import Action, Game, GameAction, GameState, Player, Role, Life
 from src.handlers.end import check_for_the_end
-from src.rules import RoleRule, State
+from src.rules import State, LifeRule
 
 dp = Dispatch()
 
 
-@dp.message(State(GameState.day), RoleRule(Role.died))
+@dp.message(State(GameState.day), LifeRule(Life.died))
 async def day(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
 
@@ -29,7 +29,7 @@ async def start_day(game: Game):
 
 
 async def start_voting(game: Game):
-    players = await Player.filter(game=game).exclude(role=Role.died)
+    players = await Player.filter(game=game).exclude(life=Life.died)
     keyboard = InlineKeyboard()
     for player in players:
         keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}/vote/{player.id}"))
@@ -59,11 +59,11 @@ async def make_night_actions(game: Game):
         await api.send_message(
             killed.player.id, "Тебя убили :(\nТы можешь написать предсмертное сообщение сюда"
         )
-        killed.player.role = Role.died
-        await killed.player.save(update_fields=("role",))
+        killed.player.life = Life.died
+        await killed.player.save(update_fields=("life",))
     if revived:
         await api.send_message(revived.player.id, "Доктор приходил к тебе ночью")
-        await revived.player.save(update_fields=("role",))
+        await revived.player.save(update_fields=("life",))
 
     await send_actions(game, killed, revived)
 
@@ -81,7 +81,7 @@ async def send_actions(game: Game, killed: GameAction | None, revived: GameActio
 
 async def check_actions(game: Game):
     active_roles = await Player.filter(game=game).exclude(
-        Q(role=Role.civilian) | Q(role=Role.died)
+        Q(role=Role.civilian) | Q(life=Life.died)
     )
     actions = await GameAction.filter(game=game)
     if len(active_roles) == len(actions):

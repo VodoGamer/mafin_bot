@@ -40,7 +40,6 @@ class GameMessage(Model):
 
 
 class Role(Enum):
-    died = "Мёртв"
     civilian = "Мирный житель"
     don = "Дон"
     mafia = "Мафия"
@@ -48,10 +47,16 @@ class Role(Enum):
     doctor = "Доктор"
 
 
+class Life(IntEnum):
+    died = 0
+    alive = 1
+
+
 class Player(Model):
     id: int = fields.BigIntField(pk=True)
     name: str = fields.CharField(150)
     role: Role = fields.CharEnumField(Role, default=Role.civilian)
+    life: Life = fields.IntEnumField(Life, default=Life.alive)
     votes: fields.ReverseRelation["Vote"]
 
     game: fields.ForeignKeyRelation[Game] = fields.ForeignKeyField(
