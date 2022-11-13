@@ -1,0 +1,45 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v3.4.0"
+    hooks:
+      - id: check-merge-conflict
+        stages: [ commit, push ]
+      - id: check-ast
+        stages: [ commit ]
+
+  - repo: local
+    hooks:
+      - id: black
+        name: black
+        entry: poetry run black
+        language: system
+        types: [ python ]
+        stages: [ commit ]
+
+      - id: isort
+        name: isort
+        entry: poetry run isort src
+        language: system
+        types: [ python ]
+        stages: [ commit ]
+
+      - id: mypy
+        name: mypy check
+        entry: poetry run mypy src
+        language: system
+        pass_filenames: false
+        stages: [ commit ]
+
+      - id: pyright
+        name: pyright check
+        entry: poetry run pyright src
+        language: system
+        pass_filenames: false
+        stages: [ commit ]
+
+      - id: pylint
+        name: pylint check
+        entry: poetry run pylint src
+        language: system
+        pass_filenames: false
+        stages: [ commit ]
