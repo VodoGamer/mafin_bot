@@ -15,8 +15,8 @@ async def check_timers():
         games = await Game.filter(state=GameState.set_in_game).prefetch_related(
             "players", "messages"
         )
-        logger.debug(f"{games=}")
         for game in games:
+            logger.debug(f"{game=} {game.start_date=}")
             now = datetime.now(tz=timezone.utc)
             start_date = game.start_date + SET_IN_GAME_TIME
             if start_date < now:
