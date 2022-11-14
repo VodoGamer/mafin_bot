@@ -1,7 +1,9 @@
+import pathlib
+
 from loguru import logger
 from telegrinder import CallbackQuery, Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import HTMLFormatter, MarkdownFormatter
-from telegrinder.types.objects import InlineKeyboardMarkup
+from telegrinder.types.objects import InlineKeyboardMarkup, InputFile
 from tortoise.expressions import Q
 
 from src.bot.init import api
@@ -29,11 +31,12 @@ async def start_night(game: Game):
         return
     await Night.create(game=game)
     keyboard = await get_keyboard_to_bot()
-    await api.send_message(
+    await api.send_photo(
         game.chat_id,
-        MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
+        caption=MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
         parse_mode=MarkdownFormatter.PARSE_MODE,
         reply_markup=keyboard.get_markup(),
+        photo=InputFile("night.jpg", pathlib.Path("src/images/night.jpg").read_bytes()),
     )
 
     active_roles = await Player.filter(game=game).exclude(
@@ -76,7 +79,9 @@ async def delete_nights_messages(message: Message):
     await message.api.delete_message(message.chat.id, message.message_id)
 
 
-async def make_night_action(event: CallbackQuery, game_id: int, player_id: int, text: str):
+async def make_night_action(
+    event: CallbackQuery, game_id: int, player_id: int, text: str, action: Action
+):
     game = await Game.get(id=game_id)
     player = await Player.get(id=player_id, game=game)
     if event.message:
@@ -86,5 +91,5 @@ async def make_night_action(event: CallbackQuery, game_id: int, player_id: int, 
             text=f"{text}{player}",
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
-    await GameAction.create(game=game, player=player, type=Action.kill)
+    await GameAction.create(game=game, player=player, type=action)
     return game

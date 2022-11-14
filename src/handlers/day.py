@@ -1,7 +1,9 @@
 import asyncio
+import pathlib
 
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import MarkdownFormatter
+from telegrinder.types import InputFile
 from tortoise.expressions import Q
 
 from src.bot.init import api
@@ -92,12 +94,17 @@ async def make_night_actions(game: Game):
 
 async def send_actions(game: Game, killed: GameAction | None, revived: GameAction | None):
     if not killed or (killed and revived and killed.player.id == revived.player.id):
-        await api.send_message(game.chat_id, "Сегодня все выжили!")
-    else:
-        await api.send_message(
+        await api.send_photo(
             game.chat_id,
-            f"Сегодня ночью убили: {killed.player}",
+            caption="Сегодня все выжили!",
+            photo=InputFile("alive.jpg", pathlib.Path("src/images/alive.jpg").read_bytes()),
+        )
+    else:
+        await api.send_photo(
+            game.chat_id,
+            caption=f"Сегодня ночью убили: {killed.player}",
             parse_mode=MarkdownFormatter.PARSE_MODE,
+            photo=InputFile("kill.jpg", pathlib.Path("src/images/kill.jpg").read_bytes()),
         )
 
 

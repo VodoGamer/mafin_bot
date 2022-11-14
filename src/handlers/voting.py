@@ -1,7 +1,10 @@
+import pathlib
+
 from loguru import logger
 from telegrinder import CallbackQuery, Dispatch
 from telegrinder.rules import CallbackDataMarkup
 from telegrinder.tools import MarkdownFormatter
+from telegrinder.types import InputFile
 from tortoise.functions import Count
 
 from src.bot.init import api
@@ -64,6 +67,9 @@ async def end_voting(game: Game):
         player = await Player.get(game=game, id=most_votes[0][0])
         player.life = Life.died
         await player.save()
-        await api.send_message(
-            game.chat_id, f"вешаем {player}", parse_mode=MarkdownFormatter.PARSE_MODE
+        await api.send_photo(
+            game.chat_id,
+            caption=f"вешаем {player}",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+            photo=InputFile("kick.jpg", pathlib.Path("src/images/kick.jpg").read_bytes()),
         )

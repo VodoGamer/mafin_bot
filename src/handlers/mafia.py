@@ -3,7 +3,7 @@ from telegrinder.bot.rules import CallbackDataMarkup, IsPrivate
 from telegrinder.tools import MarkdownFormatter
 
 from src.bot.init import api
-from src.db.models import Player
+from src.db.models import Action, Player
 from src.db.models import Role as GameRole
 from src.handlers.day import check_actions
 from src.handlers.night import make_night_action
@@ -16,7 +16,7 @@ dp = Dispatch()
     RoleCallback(GameRole.don), CallbackDataMarkup("game/<game_id>/action/<player_id>")
 )
 async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
-    game = await make_night_action(event, game_id, player_id, "Ты решил зарезать: ")
+    game = await make_night_action(event, game_id, player_id, "Ты решил зарезать: ", Action.kill)
     await event.api.send_message(game.chat_id, "Мафия решила кого-то зарезать")
     await check_actions(game)
 
