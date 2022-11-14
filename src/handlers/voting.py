@@ -15,7 +15,9 @@ dp = Dispatch()
 async def vote(event: CallbackQuery, game_id: int, player_id: int):
     if not event.message:
         return
-    player = await Player.get(id=player_id).prefetch_related("game")
+    game = await Game.get(id=game_id)
+    player = await Player.get(id=player_id, game=game)
+    from_player = await Player.get(id=event.from_user.id, game=game)
     await api.edit_message_text(
         event.from_user.id,
         event.message.message_id,
@@ -23,8 +25,11 @@ async def vote(event: CallbackQuery, game_id: int, player_id: int):
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     await Vote.create(game_id=game_id, goal_user=player)
-    if await check_for_end_voting(player.game):
-        await end_day(player.game)
+    await api.send_message(
+        game.chat_id, f"{from_player} проголосовал за кик", parse_mode=MarkdownFormatter.PARSE_MODE
+    )
+    if await check_for_end_voting(game):
+        await end_day(game)
 
 
 async def end_day(game: Game):
@@ -52,7 +57,7 @@ async def end_voting(game: Game):
         .order_by("-count")
         .values_list("goal_user_id", "count")
     )
-    logger.debug(most_votes)
+    logger.debug(f"{most_votes=}")
     if not most_votes or (len(most_votes) > 1 and most_votes[0][1] == most_votes[1][1]):
         await api.send_message(game.chat_id, "жители не определились")
     else:

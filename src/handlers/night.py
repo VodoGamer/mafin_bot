@@ -1,11 +1,22 @@
 from loguru import logger
-from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
+from telegrinder import CallbackQuery, Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import HTMLFormatter, MarkdownFormatter
 from telegrinder.types.objects import InlineKeyboardMarkup
 from tortoise.expressions import Q
 
 from src.bot.init import api
-from src.db.models import Game, GameMessage, GameState, Life, MessagePayload, Night, Player, Role
+from src.db.models import (
+    Action,
+    Game,
+    GameAction,
+    GameMessage,
+    GameState,
+    Life,
+    MessagePayload,
+    Night,
+    Player,
+    Role,
+)
 from src.handlers.day import get_keyboard_to_bot
 from src.handlers.end import check_for_the_end
 from src.rules import State
@@ -53,7 +64,7 @@ def get_players_keyboard(
 ) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboard()
     for player in players:
-        if active_player.role == Role.mafia and player.id == active_player.id:
+        if player.id == active_player.id and active_player.role in (Role.mafia, Role.don):
             continue
         keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}/action/{player.id}"))
         keyboard.row()
@@ -63,3 +74,17 @@ def get_players_keyboard(
 @dp.message(State(GameState.night))
 async def delete_nights_messages(message: Message):
     await message.api.delete_message(message.chat.id, message.message_id)
+
+
+async def make_night_action(event: CallbackQuery, game_id: int, player_id: int, text: str):
+    game = await Game.get(id=game_id)
+    player = await Player.get(id=player_id, game=game)
+    if event.message:
+        await event.api.edit_message_text(
+            event.from_user.id,
+            event.message.message_id,
+            text=f"{text}{player}",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+        )
+    await GameAction.create(game=game, player=player, type=Action.kill)
+    return game

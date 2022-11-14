@@ -14,16 +14,16 @@ from src.handlers.voting import end_day
 
 async def check_timers():
     while True:
-        games = await Game.all().prefetch_related("players", "messages")
+        games = await Game.all()
         for game in games:
             now = datetime.now(tz=timezone.utc)
             if game.state == GameState.set_in_game:
                 logger.debug(f"{game=} {game.start_date=}")
                 start_date = game.start_date + SET_IN_GAME_TIME
-                if start_date < now:
+                if start_date < now or start_date - now == 0:
                     await start_game(game)
                 elif start_date - now <= SET_IN_GAME_TIME / 2:
-                    await send_or_update_timer(game, (start_date - now).seconds)
+                    await send_or_update_timer(game, round((start_date - now).seconds, -1))
 
             elif game.state == GameState.night:
                 night = await Night.filter(game=game).order_by("-id").first()
