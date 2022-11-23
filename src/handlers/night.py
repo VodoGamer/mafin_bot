@@ -45,12 +45,18 @@ async def start_night(game: Game):
     logger.debug(f"{active_roles=} now; send action messages for them")
     alive_players = await Player.filter(game=game).exclude(life=Life.died)
     logger.debug(f"{alive_players=} now")
+
+    await api.send_message(
+        game.chat_id,
+        "Выжившие люди😱: \n +" "\n".join(map(str, alive_players)),
+        parse_mode=MarkdownFormatter.PARSE_MODE,
+    )
     for player in active_roles:
         if not player.role:
             raise ValueError(f"WTF! no player role {player.id}")
         result = await api.send_message(
             player.id,
-            f"Ты - {HTMLFormatter(player.role.value).bold()}\nвремя ходить",
+            "Время ходить✊",
             reply_markup=get_players_keyboard(game, player, alive_players),
             parse_mode=HTMLFormatter.PARSE_MODE,
         )

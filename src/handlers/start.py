@@ -45,7 +45,17 @@ async def start_game(game: Game):
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     await give_roles(players)
+    await send_role_notice(players)
     await start_night(game)
+
+
+async def send_role_notice(players: list[Player]):
+    for player in players:
+        await api.send_message(
+            player.id,
+            f"Ты — {MarkdownFormatter(player.role.value).italic()}",
+            parse_mode=MarkdownFormatter.PARSE_MODE,
+        )
 
 
 async def give_roles(players: list[Player]):

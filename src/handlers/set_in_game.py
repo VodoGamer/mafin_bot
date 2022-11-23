@@ -38,15 +38,18 @@ async def set_in_game_command(message: Message):
 
 async def set_in_game(game: Game):
     keyboard = await get_set_in_game_markup(game)
-    message = await api.send_message(
-        chat_id=game.chat_id,
-        text=set_game_0_players.text,
-        parse_mode=set_game_0_players.PARSE_MODE,
-        reply_markup=keyboard,
-    )
+    message = (
+        await api.send_message(
+            chat_id=game.chat_id,
+            text=set_game_0_players.text,
+            parse_mode=set_game_0_players.PARSE_MODE,
+            reply_markup=keyboard,
+        )
+    ).unwrap()
+    await api.pin_chat_message(game.chat_id, message.message_id, disable_notification=True)
     await GameMessage.create(
         game=game,
-        message_id=message.unwrap().message_id,
+        message_id=message.message_id,
         payload=MessagePayload.set_in_game,
     )
 
@@ -89,12 +92,13 @@ async def update_set_in_game_message(game: Game):
     keyboard = await get_set_in_game_markup(game)
     players = await Player.filter(game=game)
     logger.debug(f"{game=} players now: {players}")
-    players = map(str, players)
 
-    await api.edit_message_text(
+    message = await api.edit_message_text(
         chat_id=game.chat_id,
         message_id=message.message_id,
-        text=set_game_with_players.text.format(players=", ".join(players)),
+        text=set_game_with_players.text.format(
+            players=", ".join(map(str, players)), players_count=len(players)
+        ),
         reply_markup=keyboard,
         parse_mode=set_game_with_players.PARSE_MODE,
     )

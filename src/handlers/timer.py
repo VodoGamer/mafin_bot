@@ -23,7 +23,7 @@ async def check_timers():
                 if start_date < now or start_date - now == 0:
                     await start_game(game)
                 elif start_date - now <= SET_IN_GAME_TIME / 2:
-                    await send_or_update_timer(game, round((start_date - now).seconds, -1))
+                    await send_or_update_timer(game, (start_date - now).seconds)
 
             elif game.state == GameState.night:
                 night = await Night.filter(game=game).order_by("-id").first()

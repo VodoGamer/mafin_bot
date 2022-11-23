@@ -22,6 +22,7 @@ set_game_0_players = Phrase(
     MarkdownFormatter.PARSE_MODE,
 )
 set_game_with_players = Phrase(
-    MarkdownFormatter("Набор в игру").bold() + "\nПрисоединились:\n{players}",
+    MarkdownFormatter("Набор в игру").bold() + "\nПрисоединились:\n{players}\n\n"
+    "{players_count} игрока\\(ов\\)😎",
     MarkdownFormatter.PARSE_MODE,
 )
