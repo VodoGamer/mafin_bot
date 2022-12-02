@@ -9,12 +9,12 @@ from telegrinder.types import InlineKeyboardMarkup
 from src.bot.init import api
 from src.bot.phrases import set_game_0_players, set_game_with_players, start_command
 from src.db.models import Game, GameMessage, GameState, MessagePayload, Player
+from src.handlers.timer import check_game_timers
 from src.rules import ChatCommand
 
 dp = Dispatch()
 
 START_COMMAND = "/set_in_game"
-SET_IN_GAME_TIME = timedelta(seconds=60)
 
 
 @dp.message(ChatCommand("/start"))
@@ -34,6 +34,22 @@ async def set_in_game_command(message: Message):
     logger.debug(f"{game[0].chat_id} | {game=}")
     if game[1]:
         await set_in_game(game[0])
+
+
+@dp.message(ChatCommand("/expand_time"))
+async def expand_time(message: Message):
+    await api.delete_message(message.chat.id, message.message_id)
+    game = await Game.get_or_create(
+        {
+            "state": GameState.set_in_game,
+        },
+        chat_id=message.chat.id,
+    )
+    if game[0]:
+        game[0].start_date += timedelta(seconds=20)
+        await game[0].save()
+        await message.answer("Добавлено 20 секунд времени!")
+        await check_game_timers(game[0])
 
 
 async def set_in_game(game: Game):

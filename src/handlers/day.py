@@ -42,7 +42,7 @@ async def start_day(game: Game):
     if await check_for_the_end(game):
         return
     await api.send_message(game.chat_id, "Наступает день.\n")
-    await asyncio.sleep(20)
+    await asyncio.sleep(45)
     await start_voting(game)
 
 
@@ -50,9 +50,13 @@ async def start_voting(game: Game):
     players = await Player.filter(game=game).exclude(life=Life.died)
     keyboard = InlineKeyboard()
     for player in players:
-        keyboard.add(InlineButton(player.name, callback_data=f"game/{game.id}/vote/{player.id}"))
-        keyboard.row()
-    for player in players:
+        for kb_player in players:
+            if kb_player == player:
+                continue
+            keyboard.add(InlineButton(
+                kb_player.name, callback_data=f"game/{game.id}/vote/{kb_player.id}"))
+            keyboard.row()
+
         result = await api.send_message(
             player.id, "голосование кого кикнуть:", reply_markup=keyboard.get_markup()
         )
@@ -86,7 +90,9 @@ async def make_night_actions(game: Game):
         killed.player.life = Life.died
         await killed.player.save(update_fields=("life",))
     if revived:
-        await api.send_message(revived.player.id, "Доктор приходил к тебе ночью")
+        doctor = await Player.get(game=game, role=Role.doctor)
+        if doctor != revived.player:
+            await api.send_message(revived.player.id, "Доктор приходил к тебе ночью")
         await revived.player.save(update_fields=("life",))
 
     await send_actions(game, killed, revived)
