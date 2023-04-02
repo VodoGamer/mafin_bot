@@ -5,18 +5,18 @@ from loguru import logger
 
 from src.handlers.timer import check_timers
 
-from .bot.init import bot
+from .bot.init import bot, dispatch
 from .config.db import db_init
 from .handlers import dps
 
 loop = asyncio.new_event_loop()
 for dp in dps:
-    bot.dispatch.message.handlers.extend(dp.message.handlers)
-    bot.dispatch.default_handlers.extend(dp.default_handlers)
-    bot.dispatch.callback_query.handlers.extend(dp.callback_query.handlers)
+    dispatch.message.handlers.extend(dp.message.handlers)
+    dispatch.default_handlers.extend(dp.default_handlers)
+    dispatch.callback_query.handlers.extend(dp.callback_query.handlers)
 
-bot.dispatch.message.middlewares.extend([])
-
+dispatch.message.middlewares.extend([])
+bot.dispatch = dispatch
 
 loop.run_until_complete(db_init())
 loop.create_task(bot.run_polling())

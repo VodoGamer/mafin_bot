@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres:15.2
+    container_name: ${PROJECT_NAME}_db
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    expose:
+      - 5432
+  app:
+    build:
+      context: .
+      args:
+        - PROJECT_NAME=${PROJECT_NAME}
+    container_name: ${PROJECT_NAME}
+    image: ${PROJECT_NAME}
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data: null

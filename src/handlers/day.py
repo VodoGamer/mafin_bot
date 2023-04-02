@@ -25,6 +25,15 @@ from src.rules import LifeRule, State
 dp = Dispatch()
 
 
+class ActiveRole:
+    def __init__(self, id: int, role: Role) -> None:
+        self.id = id
+        self.role = role
+
+    def make_night_action(self):
+        ...
+
+
 @dp.message(State(GameState.day), LifeRule(Life.died))
 async def day(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
@@ -53,8 +62,9 @@ async def start_voting(game: Game):
         for kb_player in players:
             if kb_player == player:
                 continue
-            keyboard.add(InlineButton(
-                kb_player.name, callback_data=f"game/{game.id}/vote/{kb_player.id}"))
+            keyboard.add(
+                InlineButton(kb_player.name, callback_data=f"game/{game.id}/vote/{kb_player.id}")
+            )
             keyboard.row()
 
         result = await api.send_message(

@@ -6,8 +6,8 @@ from telegrinder.tools import MarkdownFormatter
 
 from src.bot.init import api
 from src.db.models import Day, Game, GameMessage, GameState, MessagePayload, Night
-from src.handlers.day import start_day
 from src.handlers.config import SET_IN_GAME_TIME
+from src.handlers.day import start_day
 from src.handlers.start import start_game
 from src.handlers.voting import end_day
 

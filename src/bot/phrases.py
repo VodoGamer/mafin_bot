@@ -1,9 +1,10 @@
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from telegrinder.tools import MarkdownFormatter
 
 
-class Phrase(NamedTuple):
+@dataclass(frozen=True, slots=True)
+class Phrase:
     text: str
     PARSE_MODE: str
 

@@ -1,18 +1,18 @@
-name: CI
+name: Lint and check types
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
-  testing:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Install poetry
-        run: pipx install poetry==1.2.0
+        run: pipx install poetry==1.4.1
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v4.1.0
         id: python-setup
         with:
           python-version: "3.10"
@@ -21,18 +21,21 @@ jobs:
       - name: Set python version for poetry
         run: poetry env use 3.10
 
+      - name: Validate the structure of the pyproject.toml
+        run: poetry check
+
+      - name: Verify that poetry.lock is consistent with pyproject.toml
+        run: poetry lock --check
+
       - name: Install dependencies
         if: steps.python-setup.outputs.cache-hit != 'true'
         run: poetry install --with dev
 
-      - name: Run flake8
-        run: poetry run flake8
+      - name: Check code formatting by black
+        run: poetry run black . --check
 
-      - name: Run mypy
-        run: poetry run mypy src
+      - name: Run ruff
+        run: poetry run ruff .
 
-      - name: Run pyright
-        run: poetry run pyright src
-
-      - name: Run pylint
-        run: poetry run pylint src
+      - name: Check types by pyright
+        run: poetry run pyright
