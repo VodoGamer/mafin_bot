@@ -59,7 +59,7 @@ class Life(IntEnum):
 
 class Player(Model):
     id: int = fields.BigIntField(pk=True)
-    name: str = fields.CharField(150)
+    name: str = fields.CharField(150)  # type: ignore
     role: Role = fields.CharEnumField(Role, default=Role.civilian)
     life: Life = fields.IntEnumField(Life, default=Life.alive)
     votes: fields.ReverseRelation["Vote"]
