@@ -21,16 +21,16 @@ async def check_for_the_end(game: Game):
     logger.debug(f"{alive_players=} and {mafia=} alive now")
     if mafia <= 0:
         await api.send_message(
-            game.chat_id,
-            "ИГРА ОКОНЧЕНА\nПобедили мирные\n\n{}".format("\n".join(all_players)),
+            chat_id=game.chat_id,
+            text="ИГРА ОКОНЧЕНА\nПобедили мирные\n\n{}".format("\n".join(all_players)),
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
         await game.delete()
         return True
     if alive_players <= mafia * 2:
         await api.send_message(
-            game.chat_id,
-            "ИГРА ОКОНЧЕНА\nПобедила мафия\n\n{}".format("\n".join(all_players)),
+            chat_id=game.chat_id,
+            text="ИГРА ОКОНЧЕНА\nПобедила мафия\n\n{}".format("\n".join(all_players)),
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
         await game.delete()

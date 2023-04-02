@@ -29,7 +29,9 @@ async def vote(event: CallbackQuery, game_id: int, player_id: int):
     )
     await Vote.create(game_id=game_id, goal_user=player)
     await api.send_message(
-        game.chat_id, f"{from_player} проголосовал за кик", parse_mode=MarkdownFormatter.PARSE_MODE
+        chat_id=game.chat_id,
+        text=f"{from_player} проголосовал за кик",
+        parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     if await check_for_end_voting(game):
         await end_day(game)
@@ -62,7 +64,7 @@ async def end_voting(game: Game):
     )
     logger.debug(f"{most_votes=}")
     if not most_votes or (len(most_votes) > 1 and most_votes[0][1] == most_votes[1][1]):
-        await api.send_message(game.chat_id, "жители не определились")
+        await api.send_message(chat_id=game.chat_id, text="жители не определились")
     else:
         player = await Player.get(game=game, id=most_votes[0][0])
         player.life = Life.died

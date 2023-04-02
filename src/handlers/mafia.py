@@ -17,7 +17,7 @@ dp = Dispatch()
 )
 async def mafia_kill(event: CallbackQuery, game_id: int, player_id: int):
     game = await make_night_action(event, game_id, player_id, "Ты решил зарезать: ", Action.kill)
-    await event.api.send_message(game.chat_id, "Мафия решила кого-то зарезать")
+    await event.api.send_message(chat_id=game.chat_id, text="Мафия решила кого-то зарезать")
     await check_actions(game)
 
 
@@ -29,7 +29,7 @@ async def mafia_communication(message: Message):
     mafias = await Player.filter(game=player.game).exclude(id=player.id)
     for mafia in mafias:
         await api.send_message(
-            mafia.id,
-            f"{player} сказал: {message.text}",
+            chat_id=mafia.id,
+            text=f"{player} сказал: {message.text}",
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )

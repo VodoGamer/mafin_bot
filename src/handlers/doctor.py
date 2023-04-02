@@ -15,5 +15,5 @@ dp = Dispatch()
 )
 async def doctor_heal(event: CallbackQuery, game_id: int, player_id: int):
     game = await make_night_action(event, game_id, player_id, "Ты решил лечить: ", Action.revived)
-    await event.api.send_message(game.chat_id, "Доктор ходил всю ночь с аптечкой 🤨")
+    await event.api.send_message(chat_id=game.chat_id, text="Доктор ходил всю ночь с аптечкой 🤨")
     await check_actions(game)

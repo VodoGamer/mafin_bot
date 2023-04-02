@@ -50,7 +50,7 @@ async def start_day(game: Game):
     await make_night_actions(game)
     if await check_for_the_end(game):
         return
-    await api.send_message(game.chat_id, "Наступает день.\n")
+    await api.send_message(chat_id=game.chat_id, text="Наступает день.\n")
     await asyncio.sleep(45)
     await start_voting(game)
 
@@ -68,7 +68,7 @@ async def start_voting(game: Game):
             keyboard.row()
 
         result = await api.send_message(
-            player.id, "голосование кого кикнуть:", reply_markup=keyboard.get_markup()
+            chat_id=player.id, text="голосование кого кикнуть:", reply_markup=keyboard.get_markup()
         )
         await GameMessage.create(
             message_id=result.unwrap().message_id,
@@ -78,7 +78,9 @@ async def start_voting(game: Game):
         )
     keyboard = await get_keyboard_to_bot()
     await api.send_message(
-        game.chat_id, "Начато голосование за кик: ", reply_markup=keyboard.get_markup()
+        chat_id=game.chat_id,
+        text="Начато голосование за кик: ",
+        reply_markup=keyboard.get_markup(),
     )
 
 
@@ -95,14 +97,15 @@ async def make_night_actions(game: Game):
     )
     if killed:
         await api.send_message(
-            killed.player.id, "Тебя убили :(\nТы можешь написать предсмертное сообщение сюда"
+            chat_id=killed.player.id,
+            text="Тебя убили :(\nТы можешь написать предсмертное сообщение сюда",
         )
         killed.player.life = Life.died
         await killed.player.save(update_fields=("life",))
     if revived:
         doctor = await Player.get(game=game, role=Role.doctor)
         if doctor != revived.player:
-            await api.send_message(revived.player.id, "Доктор приходил к тебе ночью")
+            await api.send_message(chat_id=revived.player.id, text="Доктор приходил к тебе ночью")
         await revived.player.save(update_fields=("life",))
 
     await send_actions(game, killed, revived)

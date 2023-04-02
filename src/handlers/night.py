@@ -47,8 +47,8 @@ async def start_night(game: Game):
     logger.debug(f"{alive_players=} now")
 
     await api.send_message(
-        game.chat_id,
-        "Выжившие люди😱: \n +" "\n".join(map(str, alive_players)),
+        chat_id=game.chat_id,
+        text="Выжившие люди😱: \n +" "\n".join(map(str, alive_players)),
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     for player in active_roles:

@@ -76,7 +76,7 @@ async def send_or_update_timer(game: Game, timer: GameMessage | None, seconds: i
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
     message = await api.send_message(
-        game.chat_id, text.format(seconds), parse_mode=MarkdownFormatter.PARSE_MODE
+        chat_id=game.chat_id, text=text.format(seconds), parse_mode=MarkdownFormatter.PARSE_MODE
     )
     await GameMessage.create(
         game=game, payload=MessagePayload.timer, message_id=message.unwrap().message_id

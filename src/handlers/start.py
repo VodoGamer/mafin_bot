@@ -29,8 +29,8 @@ async def start_game(game: Game):
 
     if len(players) <= 3:
         await api.send_message(
-            game.chat_id,
-            f"{MarkdownFormatter('Никто не пришёл').italic()} "
+            chat_id=game.chat_id,
+            text=f"{MarkdownFormatter('Никто не пришёл').italic()} "
             f"{MarkdownFormatter('на сходку(((').escape()}\n\nДля старта игры"
             " необходимо 4 игрока",
             parse_mode=MarkdownFormatter.PARSE_MODE,
@@ -40,8 +40,8 @@ async def start_game(game: Game):
     game.state = GameState.night
     await game.save()
     await api.send_message(
-        game.chat_id,
-        MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
+        chat_id=game.chat_id,
+        text=MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
         parse_mode=MarkdownFormatter.PARSE_MODE,
     )
     await give_roles(players)
@@ -52,8 +52,8 @@ async def start_game(game: Game):
 async def send_role_notice(players: list[Player]):
     for player in players:
         await api.send_message(
-            player.id,
-            f"Ты — {MarkdownFormatter(player.role.value).italic()}",
+            chat_id=player.id,
+            text=f"Ты — {MarkdownFormatter(player.role.value).italic()}",
             parse_mode=MarkdownFormatter.PARSE_MODE,
         )
 
