@@ -1,20 +1,20 @@
 from random import choice
+from typing import Iterable
 
 from loguru import logger
 from telegrinder import Dispatch, Message
 from telegrinder.bot.rules import Text
-from telegrinder.tools import MarkdownFormatter
 
-from src.bot.init import api
+from src.bot.init import api, formatter
 from src.db.models import Game, GameMessage, GameState, Player, Role
 from src.handlers.night import start_night
+from src.templates import render_template
 
 dp = Dispatch()
 
 
-@dp.message(Text("/start_game"))
+@dp.message(Text("/force_start"))
 async def force_start(message: Message):
-    await api.delete_message(message.chat.id, message.message_id)
     game = await Game.get_or_none(chat_id=message.chat.id)
     if game and game.state == GameState.recruiting:
         await start_game(game)
@@ -23,17 +23,13 @@ async def force_start(message: Message):
 async def start_game(game: Game):
     players = await Player.filter(game=game)
     messages = await GameMessage.filter(game=game)
-    for message in messages:
-        await api.delete_message(game.chat_id, message.message_id)
-        await message.delete()
+    await delete_messages(game.chat_id, messages)
 
     if len(players) <= 3:
         await api.send_message(
             chat_id=game.chat_id,
-            text=f"{MarkdownFormatter('Никто не пришёл').italic()} "
-            f"{MarkdownFormatter('на сходку(((').escape()}\n\nДля старта игры"
-            " необходимо 4 игрока",
-            parse_mode=MarkdownFormatter.PARSE_MODE,
+            text=render_template("not_enough_players.j2"),
+            parse_mode=formatter.PARSE_MODE,
         )
         await game.delete()
         return
@@ -41,20 +37,26 @@ async def start_game(game: Game):
     await game.save()
     await api.send_message(
         chat_id=game.chat_id,
-        text=MarkdownFormatter("ИГРА НАЧИНАЕТСЯ").bold(),
-        parse_mode=MarkdownFormatter.PARSE_MODE,
+        text=render_template("game_started.j2"),
+        parse_mode=formatter.PARSE_MODE,
     )
     await give_roles(players)
     await send_role_notice(players)
     await start_night(game)
 
 
+async def delete_messages(chat_id: int, messages: Iterable[GameMessage]):
+    for message in messages:
+        await api.delete_message(chat_id, message.message_id)
+        await message.delete()
+
+
 async def send_role_notice(players: list[Player]):
     for player in players:
         await api.send_message(
             chat_id=player.id,
-            text=f"Ты — {MarkdownFormatter(player.role.value).italic()}",
-            parse_mode=MarkdownFormatter.PARSE_MODE,
+            text=render_template("role_notice.j2", {"role": player.role.value}),
+            parse_mode=formatter.PARSE_MODE,
         )
 
 
@@ -72,5 +74,5 @@ async def give_role(players: list[Player], count: int, role: Role):
             continue
         user.role = role
         await user.save()
-        logger.debug(f"give {role=} for {user=}")
+        logger.debug(f"give {role=} for user={user.id}")
         count -= 1

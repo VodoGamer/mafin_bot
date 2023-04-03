@@ -56,7 +56,7 @@ async def start_night(game: Game):
             raise ValueError(f"WTF! no player role {player.id}")
         result = await api.send_message(
             player.id,
-            "Время ходить✊",
+            text="Время ходить✊",
             reply_markup=get_players_keyboard(game, player, alive_players),
             parse_mode=HTMLFormatter.PARSE_MODE,
         )

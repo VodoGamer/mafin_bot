@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from telegrinder import Dispatch, Message
-from telegrinder.bot.rules import Markup, Regex
+from telegrinder.bot.rules import Markup
 
 from src.bot.init import api, formatter
 from src.db.models import Game, GameMessage, GameState, MessagePayload, Player
@@ -18,7 +18,7 @@ async def start(message: Message):
     await message.reply(render_template("start.j2"), parse_mode=formatter.PARSE_MODE)
 
 
-@dp.message(Regex(r"^/recruiting@"))
+@dp.message(ChatCommand("/recruiting"))
 async def recruiting(message: Message):
     game = await Game.get_or_create(
         {
@@ -74,9 +74,7 @@ async def start_recruiting(game: Game):
     ).unwrap()
     await api.pin_chat_message(game.chat_id, message.message_id, disable_notification=True)
     await GameMessage.create(
-        game=game,
-        message_id=message.message_id,
-        payload=MessagePayload.recruiting,
+        game=game, message_id=message.message_id, payload=MessagePayload.recruiting
     )
 
 
