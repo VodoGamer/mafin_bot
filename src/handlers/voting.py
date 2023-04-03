@@ -10,6 +10,7 @@ from tortoise.functions import Count
 from src.bot.init import api
 from src.db.models import Game, GameAction, GameMessage, GameState, Life, Player, Vote
 from src.handlers.night import start_night
+from src.handlers.services import get_alive_players
 
 dp = Dispatch()
 
@@ -51,7 +52,7 @@ async def end_day(game: Game):
 
 async def check_for_end_voting(game: Game):
     votes = await Vote.filter(game=game).count()
-    players = await Player.filter(game=game).exclude(life=Life.died).count()
+    players = len(await get_alive_players(game))
     return votes == players
 
 

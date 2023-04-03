@@ -1,0 +1,4 @@
+<b>Выжившие люди:</b><br>
+{% for player in players %}
+<a href="tg://user?id={{ player.id }}">{{ player.name }}</a>{% if loop.last %}{% else %}, {% endif %}
+{% endfor %}

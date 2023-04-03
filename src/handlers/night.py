@@ -2,26 +2,25 @@ import pathlib
 
 from loguru import logger
 from telegrinder import CallbackQuery, Dispatch, InlineButton, InlineKeyboard, Message
-from telegrinder.tools import HTMLFormatter, MarkdownFormatter
 from telegrinder.types.objects import InlineKeyboardMarkup, InputFile
-from tortoise.expressions import Q
 
-from src.bot.init import api
+from src.bot.init import api, formatter
 from src.db.models import (
     Action,
     Game,
     GameAction,
     GameMessage,
     GameState,
-    Life,
     MessagePayload,
     Night,
     Player,
     Role,
 )
-from src.handlers.day import get_keyboard_to_bot
 from src.handlers.end import check_for_the_end
+from src.handlers.keyboards import get_bot_redirect_kb
+from src.handlers.services import get_active_players, get_alive_players
 from src.rules import State
+from src.templates import render_template
 
 dp = Dispatch()
 
@@ -30,35 +29,31 @@ async def start_night(game: Game):
     if await check_for_the_end(game):
         return
     await Night.create(game=game)
-    keyboard = await get_keyboard_to_bot()
     await api.send_photo(
-        game.chat_id,
-        caption=MarkdownFormatter("НАСТУПАЕТ НОЧЬ").bold(),
-        parse_mode=MarkdownFormatter.PARSE_MODE,
-        reply_markup=keyboard.get_markup(),
+        chat_id=game.chat_id,
+        caption=render_template("night_coming.j2"),
+        parse_mode=formatter.PARSE_MODE,
+        reply_markup=await get_bot_redirect_kb(),
         photo=InputFile("night.jpg", pathlib.Path("src/images/night.jpg").read_bytes()),
     )
 
-    active_roles = await Player.filter(game=game).exclude(
-        Q(role=Role.civilian) | Q(life=Life.died)
-    )
+    active_roles = await get_active_players(game)
     logger.debug(f"{active_roles=} now; send action messages for them")
-    alive_players = await Player.filter(game=game).exclude(life=Life.died)
+    alive_players = await get_alive_players(game)
     logger.debug(f"{alive_players=} now")
 
     await api.send_message(
         chat_id=game.chat_id,
-        text="Выжившие люди😱: \n +" "\n".join(map(str, alive_players)),
-        parse_mode=MarkdownFormatter.PARSE_MODE,
+        text=render_template("alive_players.j2", {"players": alive_players}),
+        parse_mode=formatter.PARSE_MODE,
     )
     for player in active_roles:
         if not player.role:
             raise ValueError(f"WTF! no player role {player.id}")
         result = await api.send_message(
-            player.id,
+            chat_id=player.id,
             text="Время ходить✊",
             reply_markup=get_players_keyboard(game, player, alive_players),
-            parse_mode=HTMLFormatter.PARSE_MODE,
         )
         await GameMessage.create(
             message_id=result.unwrap().message_id,
@@ -95,7 +90,7 @@ async def make_night_action(
             event.from_user.id,
             event.message.message_id,
             text=f"{text}{player}",
-            parse_mode=MarkdownFormatter.PARSE_MODE,
+            parse_mode=formatter.PARSE_MODE,
         )
     await GameAction.create(game=game, player=player, type=action)
     return game

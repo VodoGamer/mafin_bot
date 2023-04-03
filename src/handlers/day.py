@@ -4,7 +4,6 @@ import pathlib
 from telegrinder import Dispatch, InlineButton, InlineKeyboard, Message
 from telegrinder.tools import MarkdownFormatter
 from telegrinder.types import InputFile
-from tortoise.expressions import Q
 
 from src.bot.init import api
 from src.db.models import (
@@ -20,6 +19,8 @@ from src.db.models import (
     Role,
 )
 from src.handlers.end import check_for_the_end
+from src.handlers.keyboards import get_bot_redirect_kb
+from src.handlers.services import get_active_players, get_alive_players
 from src.rules import LifeRule, State
 
 dp = Dispatch()
@@ -56,7 +57,7 @@ async def start_day(game: Game):
 
 
 async def start_voting(game: Game):
-    players = await Player.filter(game=game).exclude(life=Life.died)
+    players = await get_alive_players(game)
     keyboard = InlineKeyboard()
     for player in players:
         for kb_player in players:
@@ -76,18 +77,12 @@ async def start_voting(game: Game):
             chat_id=player.id,
             game=game,
         )
-    keyboard = await get_keyboard_to_bot()
+    keyboard = await get_bot_redirect_kb()
     await api.send_message(
         chat_id=game.chat_id,
         text="Начато голосование за кик: ",
-        reply_markup=keyboard.get_markup(),
+        reply_markup=keyboard,
     )
-
-
-async def get_keyboard_to_bot():
-    bot = (await api.get_me()).unwrap().username
-    keyboard = InlineKeyboard().add(InlineButton("Перейти к боту", f"https://t.me/{bot}/"))
-    return keyboard
 
 
 async def make_night_actions(game: Game):
@@ -128,9 +123,7 @@ async def send_actions(game: Game, killed: GameAction | None, revived: GameActio
 
 
 async def check_actions(game: Game):
-    active_roles = await Player.filter(game=game).exclude(
-        Q(role=Role.civilian) | Q(life=Life.died)
-    )
+    active_roles = await get_active_players(game)
     actions = await GameAction.filter(game=game)
     if len(active_roles) == len(actions):
         await start_day(game)

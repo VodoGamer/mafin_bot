@@ -3,7 +3,7 @@ from typing import Iterable
 
 from telegrinder import Dispatch
 
-from . import day, doctor, end, force_stop, mafia, night, recruiting, start_game, voting
+from . import day, doctor, force_stop, mafia, night, recruiting, start_game, voting
 
 dps: Iterable["Dispatch"] = (
     force_stop.dp,
@@ -14,5 +14,4 @@ dps: Iterable["Dispatch"] = (
     night.dp,
     day.dp,
     voting.dp,
-    end.dp,
 )

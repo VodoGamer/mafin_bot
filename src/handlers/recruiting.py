@@ -63,13 +63,12 @@ async def join_in_game(message: Message, game_id: int):
 
 
 async def start_recruiting(game: Game):
-    me = (await api.get_me()).unwrap()
     message = (
         await api.send_message(
             chat_id=game.chat_id,
             text=render_template("recruiting.j2"),
             parse_mode=formatter.PARSE_MODE,
-            reply_markup=await get_join_game_kb(me.username, game.id),
+            reply_markup=await get_join_game_kb(game.id),
         )
     ).unwrap()
     await api.pin_chat_message(game.chat_id, message.message_id, disable_notification=True)
@@ -82,11 +81,10 @@ async def update_recruiting_message(game: Game):
     message = await GameMessage.get(game=game, payload=MessagePayload.recruiting)
     players = await Player.filter(game=game)
 
-    me = (await api.get_me()).unwrap()
     message = await api.edit_message_text(
         chat_id=game.chat_id,
         message_id=message.message_id,
         text=render_template("recruiting.j2", {"players": players}),
         parse_mode=formatter.PARSE_MODE,
-        reply_markup=await get_join_game_kb(me.username, game.id),
+        reply_markup=await get_join_game_kb(game.id),
     )
