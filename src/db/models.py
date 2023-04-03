@@ -7,7 +7,7 @@ from tortoise.models import Model
 
 
 class GameState(IntEnum):
-    set_in_game = 0
+    recruiting = 0
     day = 1
     night = 2
 
@@ -26,7 +26,7 @@ class Game(Model):
 
 
 class MessagePayload(IntEnum):
-    set_in_game = 0
+    recruiting = 0
     timer = 1
     night_action = 2
     voting = 3

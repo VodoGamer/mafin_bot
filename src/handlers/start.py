@@ -16,7 +16,7 @@ dp = Dispatch()
 async def force_start(message: Message):
     await api.delete_message(message.chat.id, message.message_id)
     game = await Game.get_or_none(chat_id=message.chat.id)
-    if game and game.state == GameState.set_in_game:
+    if game and game.state == GameState.recruiting:
         await start_game(game)
 
 

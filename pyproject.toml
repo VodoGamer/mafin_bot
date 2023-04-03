@@ -15,6 +15,7 @@ aerich = "^0.7.1"
 asyncpg = "^0.27.0"
 envparse = "^0.2.0"
 loguru = "^0.6.0"
+jinja2 = "^3.1.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"

@@ -23,7 +23,7 @@ async def check_timers():
 async def check_game_timers(game: Game):
     now = datetime.now(tz=timezone.utc)
     timers = Timers(game, now)
-    if game.state == GameState.set_in_game:
+    if game.state == GameState.recruiting:
         await timers.check_set_in_games()
     elif game.state == GameState.night:
         await timers.check_nights()
