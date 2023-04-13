@@ -9,7 +9,9 @@ class ChatCommand(ABCMessageRule):
 
     async def check(self, message: Message, ctx: dict):
         for command in self.commands:
-            if message.text and message.text.startswith(command + "@"):
+            if message.text and (
+                message.text.startswith(command + "@") or message.text.startswith(command)
+            ):
                 if message.chat.type == "private":
                     await message.reply("Эта команда доступна только в чате!")
                     return False

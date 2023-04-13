@@ -3,27 +3,28 @@ from tortoise import BaseDBAsyncClient
 
 async def upgrade(db: BaseDBAsyncClient) -> str:
     return """
-        CREATE TABLE IF NOT EXISTS "game" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "chat_id" BIGINT NOT NULL,
-    "state" SMALLINT NOT NULL,
-    "start_date" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP
+        CREATE TABLE IF NOT EXISTS "chat" (
+    "id" BIGSERIAL NOT NULL PRIMARY KEY,
+    "title" VARCHAR(255) NOT NULL
 );
-COMMENT ON COLUMN "game"."state" IS 'set_in_game: 0\nday: 1\nnight: 2';
+CREATE TABLE IF NOT EXISTS "game" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "state" VARCHAR(18) NOT NULL,
+    "chat_id" BIGINT NOT NULL REFERENCES "chat" ("id") ON DELETE CASCADE
+);
+COMMENT ON COLUMN "game"."state" IS 'enrollment: enrollment in game';
 CREATE TABLE IF NOT EXISTS "game_message" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "message_id" INT NOT NULL,
-    "payload" SMALLINT NOT NULL,
+    "payload" VARCHAR(26) NOT NULL,
     "game_id" INT NOT NULL REFERENCES "game" ("id") ON DELETE CASCADE
 );
-COMMENT ON COLUMN "game_message"."payload" IS 'set_in_game: 0\ntimer: 1';
+COMMENT ON COLUMN "game_message"."payload" IS 'enrollment: enrollment in game message';
 CREATE TABLE IF NOT EXISTS "player" (
-    "id" BIGSERIAL NOT NULL PRIMARY KEY,
-    "username" VARCHAR(150) NOT NULL,
-    "role" VARCHAR(13),
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "name" VARCHAR(255) NOT NULL,
     "game_id" INT NOT NULL REFERENCES "game" ("id") ON DELETE CASCADE
 );
-COMMENT ON COLUMN "player"."role" IS 'civilian: Мирный житель\ndon: Дон\nmafia: Мафия\ncommissioner: Комиссар\ndoctor: Доктор';
 CREATE TABLE IF NOT EXISTS "aerich" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "version" VARCHAR(255) NOT NULL,

@@ -1,9 +1,7 @@
 """entry point"""
 import asyncio
 
-from loguru import logger
-
-from src.handlers.timer import check_timers
+from src.set_commands import update_bot_settings_list
 
 from .bot.init import bot, dispatch
 from .config.db import db_init
@@ -15,13 +13,8 @@ for dp in dps:
     dispatch.default_handlers.extend(dp.default_handlers)
     dispatch.callback_query.handlers.extend(dp.callback_query.handlers)
 
-dispatch.message.middlewares.extend([])
 bot.dispatch = dispatch
 
 loop.run_until_complete(db_init())
-loop.create_task(bot.run_polling())
-loop.create_task(check_timers())
-try:
-    loop.run_forever()
-except KeyboardInterrupt:
-    logger.info("KeyboardInterrupt")
+loop.run_until_complete(update_bot_settings_list())
+bot.run_forever()

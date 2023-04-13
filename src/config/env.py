@@ -10,3 +10,5 @@ DB_USER = env.str("POSTGRES_USER")
 DB_TITLE = env.str("POSTGRES_DB")
 
 DB_CONNECT = f"postgres://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_TITLE}"
+
+ADMINS_ID: list[str] = env.str("ADMINS_ID").split(",")
