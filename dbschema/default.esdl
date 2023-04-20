@@ -8,6 +8,7 @@ module default {
   scalar type GameStatus extending enum<Enrollment, Ended>;
   type Game {
     required property game_status -> GameStatus;
+    required property game_start_date -> datetime{default:= datetime_current()};
 
     required link chat -> Chat;
   }

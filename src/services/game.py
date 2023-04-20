@@ -27,7 +27,7 @@ async def get_last_game(chat_id: int) -> Game | None:
     result = await db.query(GET_GAMES_BY_CHAT_ID, chat_id=chat_id)
     if not result:
         return None
-    return result[-1]  # TODO: get by creation date
+    return result[-1]
 
 
 async def create_chat_game(chat_id: int, chat_title: str | None = "test") -> Game:
