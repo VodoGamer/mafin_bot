@@ -5,7 +5,8 @@ from telegrinder import Dispatch, Message
 from telegrinder.rules import Markup
 
 from src.bot.init import formatter
-from src.services import get_game, init_game_player
+from src.handlers.enrollment import update_enrollment_message
+from src.services import MessagePayload, get_all_players, get_game, get_message, init_game_player
 from src.templates import render_template
 
 dp = Dispatch()
@@ -25,5 +26,9 @@ async def join_game(message: Message, game_uuid: UUID):
         return
     await message.answer(render_template("joined_in_game.j2"), formatter=formatter.PARSE_MODE)
 
-    # all_players = await get_all_players(game_uuid)
-    # TODO: await update_enrollment_message
+    all_players = await get_all_players(game_uuid)
+    game_message = await get_message(game.chat.chat_id, MessagePayload.enrollment)
+    if game_message:
+        await update_enrollment_message(
+            game.chat.chat_id, game.id, game_message.message_id, all_players
+        )

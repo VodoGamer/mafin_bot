@@ -5,7 +5,7 @@ from src.bot.init import db
 from src.services import Chat, Game
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class Player:
     user_id: int
     name: str

@@ -4,9 +4,9 @@ from uuid import UUID
 from telegrinder import Dispatch, Message
 
 from src.bot.init import api, formatter
-from src.handlers.keyboards import get_enrollment_kb
+from src.handlers.keyboards import get_join_game_kb
 from src.rules import ChatCommand
-from src.services import Player, init_enrollment
+from src.services import MessagePayload, Player, create_message, init_enrollment
 from src.templates import render_template
 
 dp = Dispatch()
@@ -15,7 +15,6 @@ dp = Dispatch()
 @dp.message(ChatCommand("/enrollment"))
 async def start_enrollment_in_chat(message: Message):
     game = await init_enrollment(message.chat.id, message.chat.title)
-    print(game)
     if not game[1]:
         await message.delete()
         return
@@ -25,16 +24,15 @@ async def start_enrollment_in_chat(message: Message):
         await message.answer(
             render_template("enrollment.j2"),
             parse_mode=formatter.PARSE_MODE,
-            reply_markup=get_enrollment_kb(game[0].id, bot.username),
+            reply_markup=get_join_game_kb(game[0].id, bot.username),
         )
     ).unwrap()
     await api.pin_chat_message(
-        chat_id=message.chat.id,
-        message_id=output_message.message_id,
-        disable_notification=True,
+        chat_id=message.chat.id, message_id=output_message.message_id, disable_notification=True
     )
-
-    # TODO: save message_id
+    await create_message(
+        output_message.message_id, MessagePayload.enrollment, message.chat.id, game[0].id
+    )
 
 
 async def update_enrollment_message(
@@ -46,5 +44,5 @@ async def update_enrollment_message(
         message_id=message_id,
         text=render_template("enrollment.j2", {"players": players}),
         parse_mode=formatter.PARSE_MODE,
-        reply_markup=get_enrollment_kb(game_id, bot.username),
+        reply_markup=get_join_game_kb(game_id, bot.username),
     )
