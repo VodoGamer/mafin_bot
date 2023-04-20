@@ -1,11 +1,12 @@
 """start and process enrollment in the game"""
+from uuid import UUID
+
 from telegrinder import Dispatch, Message
-from telegrinder.rules import Markup
 
 from src.bot.init import api, formatter
-from src.db.models import Chat, Game, GameMessage, GameStates, MessagePayload, Player
 from src.handlers.keyboards import get_enrollment_kb
 from src.rules import ChatCommand
+from src.services import Player, init_enrollment
 from src.templates import render_template
 
 dp = Dispatch()
@@ -13,8 +14,8 @@ dp = Dispatch()
 
 @dp.message(ChatCommand("/enrollment"))
 async def start_enrollment_in_chat(message: Message):
-    chat = await Chat.get_or_create({"title": message.chat.title}, id=message.chat.id)
-    game = await Game.get_or_create({"state": GameStates.enrollment}, chat=chat[0])
+    game = await init_enrollment(message.chat.id, message.chat.title)
+    print(game)
     if not game[1]:
         await message.delete()
         return
@@ -28,20 +29,16 @@ async def start_enrollment_in_chat(message: Message):
         )
     ).unwrap()
     await api.pin_chat_message(
-        chat_id=chat[0].id,
+        chat_id=message.chat.id,
         message_id=output_message.message_id,
         disable_notification=True,
     )
 
-    await GameMessage.create(
-        game=game[0],
-        message_id=output_message.message_id,
-        payload=MessagePayload.enrollment,
-    )
+    # TODO: save message_id
 
 
 async def update_enrollment_message(
-    chat_id: int, game_id: int, message_id: int, players: list[Player]
+    chat_id: int, game_id: UUID, message_id: int, players: list[Player]
 ):
     bot = (await api.get_me()).unwrap()
     await api.edit_message_text(

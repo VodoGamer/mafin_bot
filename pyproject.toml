@@ -10,26 +10,17 @@ packages = []
 [tool.poetry.dependencies]
 python = "^3.10"
 telegrinder = "^0.1.dev12"
-tortoise-orm = "^0.19.2"
-aerich = "^0.7.1"
-asyncpg = "^0.27.0"
 envparse = "^0.2.0"
 loguru = "^0.6.0"
 jinja2 = "^3.1.2"
+edgedb = "^1.3.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 isort = "^5.10.1"
-tortoise-cli = "^0.1.1"
 pyright = "^1.1.279"
 pre-commit = "^2.20.0"
 ruff = "^0.0.260"
-
-
-[tool.aerich]
-tortoise_orm = "src.config.db.TORTOISE_ORM"
-location = "./migrations"
-src_folder = "./."
 
 
 [tool.black]
@@ -37,6 +28,7 @@ line-length = 99
 target-version = ['py310']
 
 [tool.ruff]
+select = ["I", "E", "F", "B", "Q"]
 exclude = ["venv", "migrations"]
 
 line-length = 99
