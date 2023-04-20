@@ -10,6 +10,6 @@ select (
         select Chat filter .chat_id=<int64>$chat_id
       )
     ),
-    game_status := <str>'Enrollment'
+    status := <str>'Enrollment'
   }
 ) {**};

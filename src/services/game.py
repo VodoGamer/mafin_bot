@@ -4,6 +4,7 @@ from uuid import UUID
 
 from src.bot.init import db
 from src.services import Chat
+from src.services.abc import read_query
 
 
 class GameStatus(Enum):
@@ -11,16 +12,16 @@ class GameStatus(Enum):
     ended = "Ended"
 
 
-ADD_CHAT_GAME = open("src/services/queries/add_chat_game.edgeql").read()
-GET_GAMES_BY_CHAT_ID = open("src/services/queries/get_games_by_chat_id.edgeql").read()
-GET_GAME_BY_UUID = open("src/services/queries/get_game_by_uuid.edgeql").read()
+ADD_CHAT_GAME = read_query("src/services/queries/add_chat_game.edgeql")
+GET_GAMES_BY_CHAT_ID = read_query("src/services/queries/get_games_by_chat_id.edgeql")
+GET_GAME_BY_UUID = read_query("src/services/queries/get_game_by_uuid.edgeql")
 
 
 @dataclass(frozen=True, slots=True)
 class Game:
     id: UUID
     chat: Chat
-    game_status: GameStatus
+    status: GameStatus
 
 
 async def get_last_game(chat_id: int) -> Game | None:
@@ -46,7 +47,7 @@ async def init_enrollment(chat_id: int, chat_title: str | None = "test") -> tupl
         return False if game already existed
     """
     game = await get_last_game(chat_id)
-    if game and game.game_status != GameStatus.ended:
+    if game and game.status != GameStatus.ended:
         return (game, False)
     game = await create_chat_game(chat_id, chat_title)
     return (game, True)

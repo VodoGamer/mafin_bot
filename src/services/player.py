@@ -3,6 +3,7 @@ from uuid import UUID
 
 from src.bot.init import db
 from src.services import Chat, Game
+from src.services.abc import read_query
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,9 +15,9 @@ class Player:
     chat: Chat
 
 
-GET_PLAYER_BY_ID = open("src/services/queries/get_player_by_id.edgeql").read()
-ADD_GAME_PLAYER = open("src/services/queries/add_game_player.edgeql").read()
-GET_ALL_PLAYERS = open("src/services/queries/get_all_players.edgeql").read()
+GET_PLAYER_BY_ID = read_query("src/services/queries/get_player_by_id.edgeql")
+ADD_GAME_PLAYER = read_query("src/services/queries/add_game_player.edgeql")
+GET_ALL_PLAYERS = read_query("src/services/queries/get_all_players.edgeql")
 
 
 async def get_player(user_id: int) -> Player | None:

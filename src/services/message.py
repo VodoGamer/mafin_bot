@@ -4,6 +4,7 @@ from uuid import UUID
 
 from src.bot.init import db
 from src.services import Chat, Game
+from src.services.abc import read_query
 
 
 class MessagePayload(Enum):
@@ -20,8 +21,8 @@ class GameMessage:
     chat: Chat
 
 
-ADD_MESSAGE = open("src/services/queries/add_message.edgeql").read()
-GET_MESSAGE = open("src/services/queries/get_message.edgeql").read()
+ADD_MESSAGE = read_query("src/services/queries/add_message.edgeql")
+GET_MESSAGE = read_query("src/services/queries/get_message.edgeql")
 
 
 async def create_message(
