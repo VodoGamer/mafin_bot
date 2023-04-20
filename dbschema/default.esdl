@@ -10,15 +10,15 @@ module default {
     required property status -> GameStatus;
     required property start_date -> datetime{default:= datetime_current()};
 
-    required link chat -> Chat;
+    required link chat -> Chat{on target delete delete source;};
   }
 
   type Player {
     required property user_id -> int64{constraint exclusive;};
     required property name -> str;
 
-    required link game -> Game;
-    required link chat -> Chat;
+    required link game -> Game{on target delete delete source;};
+    required link chat -> Chat{on target delete delete source;};
   }
 
   scalar type MessagePayload extending enum<Enrollment>;
@@ -26,7 +26,7 @@ module default {
     required property message_id -> int64;
     required property message_payload -> MessagePayload;
 
-    required link game -> Game;
-    required link chat -> Chat;
+    required link game -> Game{on target delete delete source;};
+    required link chat -> Chat{on target delete delete source;};
   }
 }
