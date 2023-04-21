@@ -1,4 +1,4 @@
-<b>НАБОР В ИГРУ</b><br>
+<b>{{ gettext ("enrollment in the game") }}</b><br>
 {% for player in players %}
 <a href="tg://user?id={{ player.user_id }}">{{ player.name }}</a><br>
 {% endfor %}

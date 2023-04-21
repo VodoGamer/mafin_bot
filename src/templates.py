@@ -3,6 +3,8 @@ from pathlib import Path
 
 import jinja2
 
+from src.bot.init import gnu_translations
+
 
 def render_template(template_name: str, data: dict | None = None) -> str:
     if data is None:
@@ -24,7 +26,9 @@ def _get_template_env():
             trim_blocks=True,
             lstrip_blocks=True,
             autoescape=True,
+            extensions=["jinja2.ext.i18n"],
         )
+        env.install_gettext_translations(gnu_translations, newstyle=True)  # type: ignore
 
         _get_template_env.template_env = env
 

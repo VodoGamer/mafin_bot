@@ -838,6 +838,18 @@ pyyaml = ">=5.1"
 virtualenv = ">=20.10.0"
 
 [[package]]
+name = "pybabel"
+version = "0.0.0.dev0"
+description = "The compiler for next generation Python."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pybabel-0.0.0.dev0-py3-none-any.whl", hash = "sha256:deaa10e9b6c841a865f3698ec23fd77276bfc44efb3c602b4213e314ac712bf3"},
+    {file = "pybabel-0.0.0.dev0.tar.gz", hash = "sha256:166c7e42cc72c7decfefe5ae11b66fb2d59de95f459f47e2a2bc9075f91d3eaa"},
+]
+
+[[package]]
 name = "pyright"
 version = "1.1.303"
 description = "Command line wrapper for pyright"
@@ -1177,4 +1189,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "02e7e19b9f1ac67c300f0a51ef60c7993abd40548d4b7b7fc368fcff49ebfdc7"
+content-hash = "78ac0c60e34d66edd9a4bda9e203bd1c01c601ce5192de44d8b8be0f43608a0e"
