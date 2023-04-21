@@ -21,8 +21,8 @@ class GameMessage:
     chat: Chat
 
 
-ADD_MESSAGE = read_query("src/services/queries/add_message.edgeql")
-GET_MESSAGE = read_query("src/services/queries/get_message.edgeql")
+ADD_MESSAGE = read_query("add_message.edgeql")
+GET_MESSAGE = read_query("get_message.edgeql")
 
 
 async def create_message(

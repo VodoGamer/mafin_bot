@@ -12,9 +12,9 @@ class GameStatus(Enum):
     ended = "Ended"
 
 
-ADD_CHAT_GAME = read_query("src/services/queries/add_chat_game.edgeql")
-GET_GAMES_BY_CHAT_ID = read_query("src/services/queries/get_games_by_chat_id.edgeql")
-GET_GAME_BY_UUID = read_query("src/services/queries/get_game_by_uuid.edgeql")
+ADD_CHAT_GAME = read_query("add_chat_game.edgeql")
+GET_GAMES_BY_CHAT_ID = read_query("get_games_by_chat_id.edgeql")
+GET_GAME_BY_UUID = read_query("get_game_by_uuid.edgeql")
 
 
 @dataclass(frozen=True, slots=True)

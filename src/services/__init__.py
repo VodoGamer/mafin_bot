@@ -1,4 +1,4 @@
-from .chat import Chat
+from .chat import Chat, delete_chat
 from .game import Game, get_game, init_enrollment
 from .message import MessagePayload, create_message, get_message
 from .player import Player, get_all_players, init_game_player
@@ -14,4 +14,5 @@ __all__ = (
     "create_message",
     "get_message",
     "get_all_players",
+    "delete_chat",
 )

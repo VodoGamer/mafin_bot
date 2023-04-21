@@ -15,9 +15,9 @@ class Player:
     chat: Chat
 
 
-GET_PLAYER_BY_ID = read_query("src/services/queries/get_player_by_id.edgeql")
-ADD_GAME_PLAYER = read_query("src/services/queries/add_game_player.edgeql")
-GET_ALL_PLAYERS = read_query("src/services/queries/get_all_players.edgeql")
+GET_PLAYER_BY_ID = read_query("get_player_by_id.edgeql")
+ADD_GAME_PLAYER = read_query("add_game_player.edgeql")
+GET_ALL_PLAYERS = read_query("get_all_players.edgeql")
 
 
 async def get_player(user_id: int) -> Player | None:
