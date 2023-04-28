@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from uuid import UUID
 
@@ -15,12 +16,14 @@ class GameStatus(Enum):
 ADD_CHAT_GAME = read_query("add_chat_game.edgeql")
 GET_GAMES_BY_CHAT_ID = read_query("get_games_by_chat_id.edgeql")
 GET_GAME_BY_UUID = read_query("get_game_by_uuid.edgeql")
+GET_ALL_ENROLLMENT_GAMES = read_query("get_all_enrollment_games.edgeql")
 
 
 @dataclass(frozen=True, slots=True)
 class Game:
     id: UUID
     chat: Chat
+    start_date: datetime
     status: GameStatus
 
 
@@ -55,3 +58,7 @@ async def init_enrollment(chat_id: int, chat_title: str | None = "test") -> tupl
 
 async def get_game(game_uuid: UUID) -> Game:
     return await db.query_single(GET_GAME_BY_UUID, game_id=game_uuid)
+
+
+async def get_enrollment_games() -> list[Game] | None:
+    return await db.query(GET_ALL_ENROLLMENT_GAMES)

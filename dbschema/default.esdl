@@ -21,7 +21,7 @@ module default {
     required link chat -> Chat{on target delete delete source;};
   }
 
-  scalar type MessagePayload extending enum<Enrollment>;
+  scalar type MessagePayload extending enum<Enrollment, Timer>;
   type Message {
     required property message_id -> int64;
     required property message_payload -> MessagePayload;

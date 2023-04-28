@@ -5,6 +5,7 @@ from telegrinder import Dispatch, Message
 
 from src.bot.init import api, formatter
 from src.handlers.keyboards import get_join_game_kb
+from src.handlers.timers import TIMER_DURATION, send_timer_message, start_timer_poling
 from src.rules import ChatCommand
 from src.services import MessagePayload, Player, create_message, init_enrollment
 from src.templates import render_template
@@ -33,6 +34,9 @@ async def start_enrollment_in_chat(message: Message):
     await create_message(
         output_message.message_id, MessagePayload.enrollment, message.chat.id, game[0].id
     )
+
+    await send_timer_message(message.chat.id, TIMER_DURATION)
+    start_timer_poling(message.chat.id)
 
 
 async def update_enrollment_message(

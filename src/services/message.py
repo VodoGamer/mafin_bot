@@ -9,6 +9,7 @@ from src.services.abc import read_query
 
 class MessagePayload(Enum):
     enrollment = "Enrollment"
+    timer = "Timer"
 
 
 @dataclass(frozen=True, slots=True)
