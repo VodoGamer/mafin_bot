@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 from src.bot.init import api, logger
+from src.handlers.start_game import start_game
 from src.services import (
     Game,
     MessagePayload,
@@ -75,7 +76,7 @@ async def poling_timer(chat_id: int):
             if remaining_delta.seconds <= TIMERS_UPDATE_FREQUENCY:
                 await asyncio.sleep(remaining_delta.seconds)
             await delete_timer_message(chat_id, timer_message.message_id)
-            # TODO: start game here
+            await start_game(game.id)
             return None
         await asyncio.sleep(TIMERS_UPDATE_FREQUENCY)
         continue

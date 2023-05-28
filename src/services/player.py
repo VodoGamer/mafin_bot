@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Enum
 from uuid import UUID
 
 from src.bot.init import db
@@ -6,10 +7,16 @@ from src.services import Chat, Game
 from src.services.abc import read_query
 
 
+class PlayerRole(Enum):
+    Civilian = "Civilian"
+    Mafia = "Mafia"
+
+
 @dataclass(frozen=True, slots=True)
 class Player:
     user_id: int
     name: str
+    role: PlayerRole
 
     game: Game
     chat: Chat
@@ -18,6 +25,7 @@ class Player:
 GET_PLAYER_BY_ID = read_query("get_player_by_id.edgeql")
 ADD_GAME_PLAYER = read_query("add_game_player.edgeql")
 GET_ALL_PLAYERS = read_query("get_all_players.edgeql")
+UPDATE_PLAYER_ROLE = read_query("update_player_role.edgeql")
 
 
 async def get_player(user_id: int) -> Player | None:
@@ -45,3 +53,7 @@ async def init_game_player(
 
 async def get_all_players(game_uuid: UUID) -> list[Player]:
     return await db.query(GET_ALL_PLAYERS, game_id=game_uuid)
+
+
+async def update_player_role(player_id: int, new_role: PlayerRole):
+    await db.query(UPDATE_PLAYER_ROLE, user_id=player_id, role=new_role.value)

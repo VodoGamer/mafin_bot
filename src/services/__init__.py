@@ -1,7 +1,7 @@
 from .chat import Chat, delete_chat
 from .game import Game, get_enrollment_games, get_game, get_last_game, init_enrollment
 from .message import MessagePayload, create_message, get_message
-from .player import Player, get_all_players, init_game_player
+from .player import Player, PlayerRole, get_all_players, init_game_player, update_player_role
 
 __all__ = (
     "Chat",
@@ -17,4 +17,6 @@ __all__ = (
     "delete_chat",
     "get_last_game",
     "get_enrollment_games",
+    "update_player_role",
+    "PlayerRole",
 )
