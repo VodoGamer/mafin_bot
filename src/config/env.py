@@ -1,7 +1,13 @@
 """parse .env variables"""
-from envparse import env
+import os
 
-env.read_envfile(".env")
-BOT_TOKEN = env.str("BOT_TOKEN")
+from dotenv import load_dotenv
 
-ADMINS_ID: list[str] = env.str("ADMINS_ID").split(",")
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+ADMINS_ID: list[str] = os.getenv("ADMINS_ID", "None").split(",")
+
+# global settings
+TIMER_DURATION: int = int(os.getenv("TIMER_DURATION", 30))
+TIMERS_UPDATE_FREQUENCY: int = int(os.getenv("TIMERS_UPDATE_FREQUENCY", 5))

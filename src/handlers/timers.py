@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 from src.bot.init import api, logger
+from src.config.env import TIMER_DURATION, TIMERS_UPDATE_FREQUENCY
 from src.handlers.start_game import start_game
 from src.services import (
     Game,
@@ -12,9 +13,6 @@ from src.services import (
     get_message,
 )
 from src.templates import render_template
-
-TIMER_DURATION = 10
-TIMERS_UPDATE_FREQUENCY = 1
 
 
 def start_timer_poling(chat_id: int):
