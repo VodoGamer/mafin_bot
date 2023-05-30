@@ -5,7 +5,7 @@ module default {
     required property title -> str;
   }
 
-  scalar type GameStatus extending enum<Enrollment, RoleAssignment, Ended>;
+  scalar type GameStatus extending enum<Enrollment, RoleAssignment, Night, Ended>;
   type Game {
     required property status -> GameStatus;
     required property start_date -> datetime{default:= datetime_current()};

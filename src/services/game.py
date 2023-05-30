@@ -11,6 +11,7 @@ from src.services.abc import read_query
 class GameStatus(Enum):
     enrollment = "Enrollment"
     role_assignment = "RoleAssignment"
+    night = "night"
     ended = "Ended"
 
 

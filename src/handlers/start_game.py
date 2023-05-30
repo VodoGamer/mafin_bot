@@ -1,6 +1,8 @@
+import asyncio
 import random
 
 from src.bot.init import api
+from src.handlers.end_game import end_game
 from src.handlers.night import start_night
 from src.services import Game, Player, PlayerRole, get_all_players, update_player_role
 from src.services.game import GameStatus, change_game_status
@@ -10,11 +12,11 @@ async def start_game(game: Game) -> None:
     await change_game_status(game.id, GameStatus.role_assignment)
     players = await get_all_players(game.id)
     if not await _check_for_start_game(players):
-        await api.send_message(game.chat.chat_id, text="Никто не пришёл на сходку(")
-        await change_game_status(game.id, GameStatus.ended)
+        await end_game(game, "Никто не пришёл на сходку((")
         return None
     await _set_random_player_to_role(players, PlayerRole.Mafia)
     await api.send_message(game.chat.chat_id, text="Игра начинается!")
+    await asyncio.sleep(2)
     await start_night(game)
 
 
