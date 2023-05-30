@@ -10,6 +10,7 @@ from src.services.abc import read_query
 
 class GameStatus(Enum):
     enrollment = "Enrollment"
+    role_assignment = "RoleAssignment"
     ended = "Ended"
 
 
@@ -25,6 +26,7 @@ ADD_CHAT_GAME = read_query("add_chat_game.edgeql")
 GET_GAMES_BY_CHAT_ID = read_query("get_games_by_chat_id.edgeql")
 GET_GAME_BY_UUID = read_query("get_game_by_uuid.edgeql")
 GET_ALL_ENROLLMENT_GAMES = read_query("get_all_enrollment_games.edgeql")
+UPDATE_GAME_STATUS = read_query("update_game_status.edgeql")
 
 
 async def get_last_game(chat_id: int) -> Game | None:
@@ -64,5 +66,5 @@ async def get_enrollment_games() -> list[Game] | None:
     return await db.query(GET_ALL_ENROLLMENT_GAMES)
 
 
-async def change_game_status():
-    ...
+async def change_game_status(game_uuid: UUID, new_status: GameStatus):
+    await db.query(UPDATE_GAME_STATUS, game_id=game_uuid, status=new_status.value)

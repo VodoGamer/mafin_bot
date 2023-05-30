@@ -74,7 +74,7 @@ async def poling_timer(chat_id: int):
             if remaining_delta.seconds <= TIMERS_UPDATE_FREQUENCY:
                 await asyncio.sleep(remaining_delta.seconds)
             await delete_timer_message(chat_id, timer_message.message_id)
-            await start_game(game.id)
+            await start_game(game)
             return None
         await asyncio.sleep(TIMERS_UPDATE_FREQUENCY)
         continue
